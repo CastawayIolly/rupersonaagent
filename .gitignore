@@ -1,0 +1,9 @@
+.vscode
+__pycache__
+pretrain_models
+posokhov/logs
+posokhov/test.ipynb
+posokhov/test.py
+posokhov/data/current_gk
+posokhov/data/next_answer
+posokhov/data/next_gk
