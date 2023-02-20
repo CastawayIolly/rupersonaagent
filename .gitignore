@@ -1,9 +1,9 @@
 .vscode
 __pycache__
 pretrain_models
-posokhov/logs
-posokhov/test.ipynb
-posokhov/test.py
-posokhov/data/current_gk
-posokhov/data/next_answer
-posokhov/data/next_gk
+generative_model/logs
+generative_model/test.ipynb
+generative_model/test.py
+generative_model/data/current_gk
+generative_model/data/next_answer
+generative_model/data/next_gk
