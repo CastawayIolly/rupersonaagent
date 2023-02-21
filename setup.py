@@ -15,6 +15,6 @@ setup(
     name="RuPersonaAgent",
     version="1.0.0",
     install_requires=environment_data['dependencies'][23]["pip"],
-    packages=find_packages(include=['generative_model', 'speech_extraction'])
+    packages=find_packages(include=['generative_model', 'speech_extraction', 'rule_based_information_extraction'])
 
 )

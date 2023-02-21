@@ -122,4 +122,7 @@ dependencies:
     - nltk==3.7
     - scipy==1.10.1
     - pyhamcrest==2.0.4
+    - pymorphy2==0.9.1
+    - spacy==3.5.0
+    - scikit-learn==1.2.1
 prefix: /path
