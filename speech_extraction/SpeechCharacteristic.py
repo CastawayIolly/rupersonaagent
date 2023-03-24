@@ -1,3 +1,38 @@
+characteristics = (
+    "NN",
+    "RB",
+    "PRP",
+    "VBP",
+    "JJ",
+    "TO",
+    "VB",
+    "DT",
+    "NNS",
+    "IN",
+    "WRB",
+    "VBD",
+    "VBN",
+    "RP",
+    "CC",
+    "VBG",
+    "JJR",
+    "RBR",
+    "WDT",
+    "MD",
+    "VBZ",
+    "WP",
+    "EX",
+    "PRP",
+    "CD",
+    "PDT",
+    "JJS",
+    "POS",
+    "FW",
+    "RBS",
+    "NNP",
+)
+
+
 class SpeechCharacteristic:
     def __init__(self, dataset_name):
         self.dataset_name = dataset_name
