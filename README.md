@@ -1,58 +1,45 @@
-
 # RuPersonaAgent
+![alt text for screen readers](https://itmo.ru/file/pages/213/logo_na_plashke_russkiy_belyy.png "Text to show on mouseover").
+
+## The purpose of the project
+The rupersonaagent library is designed for quick and easy development of a Russian-language personalized conversational agent with dynamic long-term memory. Each method and model can also be used separately for purposes other than developing a conversational agent.
+
+## Table of Contents
+
+-  [Core features](#core-features)
+-  [Installation](#installation)
+-  [Examples](#examples)
+-  [Project Structure](#project-structure)
+-  [Documentation](#documentation)
+-  [License](#license)
+-  [Acknowledgments](#acknowledgments)
+-  [Contacts](#contacts)
+-  [Citation](#citation)
 
 
-The purpose of the project
---------------------------
-Here you can write about what your application can do and what's its goal.
-For that purpose you can use bullet or numbered lists, GIFs and links.
-
-1. Goal 1
-2. Goal 2
-
-Table of Contents
---------------------
-
-- `Core features <Core features_>`_
-- `Installation <Installation_>`_
-- `Examples <Examples_>`_
-- `Project Structure <Project Structure_>`_
-- `Documentation <Documentation_>`_
-- `Getting started <Getting started_>`_
-- `License <License_>`_
-- `Acknowledgments <Acknowledgments_>`_
-- `Contacts <Contacts_>`_
-- `Citation <Citation_>`_
+## Core features
 
 
-Core features
--------------
-
-* Feature 1
+* 
 * Feature 2
-* etc.
+* Long-term memory
 
 
 
-Installation
-------------
-How users can install your project.
+## Installation
 
-*Name of your project* can be installed with ``pip``:
+RuPersonaAgent can be installed with ``pip``:
 
-.. code-block::
+```
+  $ pip install rupersonaagent
+```
 
-  $ pip install name
-
-
-Examples
-------------
+## Examples
 Describe examples how it should work and should be used.
 Images, GIFs and code cells are welcome.
 
 
-Project Structure
------------------
+## Project Structure
 Stable version is located ...
 
 Repo includes:
@@ -61,39 +48,36 @@ Repo includes:
 * package 2 - explanation
 * etc.
 
-Documentation
--------------
-Link to the documentation
-
-Getting started
----------------
-Tutorials if any
-
-License
--------
-Link to the license
-
-Acknowledgments
----------------
+## Documentation
+[Documentation](https://gitlab.com/Iolly/rupersonaagent/-/wikis/Документация)
 
 
-Contacts
---------
-Your contacts. For example:
+## License
+[License](LICENSE)
 
-- `Telegram channel <https://t.me/>`_ answering questions about your project
-- `VK group <https://vk.com/>`_ your VK group
-- etc.
+## Acknowledgments
+Gratitude to [ITMO University](https://itmo.ru) for sponsoring and supporting this project
 
-Citation
---------
 
-@article{"name",
-  title = {},
-  author = {},
+## Contacts
+[Telegram channel](<https://t.me/rupersonaagent>) Q&A RuPersonaAgent
+
+## Citation
+
+
+@article{"persona",
+  title = {Persona Knowledge Extraction from Dialog Data in Russian Language},
+  author = {Pavel Posokhov, Ekaterina Rudaleva, Stepan Skrylnikov, Olesia Makhnytkina, Vladimir Kabarov},
   journal = {},
-  year = {},
+  year = {2023},
   issn = {},
   doi = {}}
 
-bibtex-ссылку удобно брать с google scholar
+@article{"persona2",
+  title = {Application of Internet search to improve the dialogue model in Russian},
+  author = {},
+  journal = {},
+  year = {2023},
+  issn = {},
+  doi = {}}
+
