@@ -10,7 +10,7 @@ before_script:
 test:
   script:
     - pip install flake8 pytest pytest-mock
-    - if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - python setup.py install
     - flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - python -m pytest tests/
 
