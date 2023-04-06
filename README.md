@@ -20,9 +20,10 @@ The rupersonaagent library is designed for quick and easy development of a Russi
 ## Core features
 
 
-* 
-* Feature 2
+* Speech Extraction
+* Generative Model
 * Long-term memory
+* Persona Knowledge Extraction
 
 
 
@@ -35,18 +36,16 @@ RuPersonaAgent can be installed with ``pip``:
 ```
 
 ## Examples
-Describe examples how it should work and should be used.
-Images, GIFs and code cells are welcome.
 
 
 ## Project Structure
-Stable version is located ...
+Stable version is located in the main branch
 
 Repo includes:
 
-* package 1 - explanation
-* package 2 - explanation
-* etc.
+* generative_model - methods for creating and working with generative Russian language models
+* speech_extraction - methods for extracting the main characteristics of speech from datasets or individual cues, a method for assessing the similarity of speech characteristics
+* rule_based_information_extraction - methods for extracting important facts about a person from a text based on linguistic rules
 
 ## Documentation
 [Documentation](https://gitlab.com/Iolly/rupersonaagent/-/wikis/Документация)
