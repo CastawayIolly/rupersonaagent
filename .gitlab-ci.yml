@@ -1,6 +1,7 @@
 image: python:latest
 
 before_script:
+  - python -m pip install --upgrade pip
   - python --version  # For debugging
   - pip install virtualenv
   - virtualenv venv
@@ -9,5 +10,7 @@ before_script:
 test:
   script:
     - pip install flake8 pytest pytest-mock
-    - flake8 speech_extraction
+    - if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - python -m pytest tests/
 

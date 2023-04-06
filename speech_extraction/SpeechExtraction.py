@@ -145,3 +145,8 @@ def compare_characteristics(first_characteristic: SpeechCharacteristic,
     second = list(second_characteristic.__dict__.values())[1:]
     _, pnorm = stats.mannwhitneyu(first, second, use_continuity=False)
     return pnorm
+
+r=get_info_from_dataset('us politics', path="/Users/anastasia/Documents/rupersonaagent/data/us.csv", column_name="text", delimeter=",")
+v=get_info_from_dataset('hockey', path="/Users/anastasia/Documents/rupersonaagent/data/interview.csv", column_name="text", delimeter=",")
+
+print( compare_characteristics(r,v))
