@@ -116,7 +116,6 @@ dependencies:
     - urllib3==1.26.12
     - werkzeug==2.2.2
     - xxhash==3.1.0
-    - numpy==1.23.2
     - yarl==1.8.1
     - pandas==1.4.4
     - nltk==3.7
@@ -125,4 +124,5 @@ dependencies:
     - pymorphy2==0.9.1
     - spacy==3.5.0
     - scikit-learn==1.2.1
+    - numpy==1.23.2
 prefix: /path
