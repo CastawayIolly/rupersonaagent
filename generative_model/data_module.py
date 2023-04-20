@@ -1,15 +1,12 @@
-import json
-import random
-from typing import *
 import os
-
 import random
 import json
-import pandas as pd
-import pytorch_lightning as pl
 import torch
 import transformers
 import datasets as ds
+import pandas as pd
+import pytorch_lightning as pl
+from typing import *
 
 
 class TolokaDataModule(pl.LightningDataModule):
@@ -30,9 +27,8 @@ class TolokaDataModule(pl.LightningDataModule):
             os.path.join(self.hparams.data_dir, dataset_name)
             for dataset_name in self.hparams.datasets
         ]
-        datasets_instanse = [ds.load_from_disk(path) for path in datasets_path]
-        self.datasets = {k: v for k, v in zip(self.hparams.datasets, datasets_instanse)}
-
+        datasets_instance = [ds.load_from_disk(path) for path in datasets_path]
+        self.datasets = {k: v for k, v in zip(self.hparams.datasets, datasets_instance)}
         self.tokenizer = tokenizer
         self.collator = MainCollator(tokenizer, spec_tokens)
 
@@ -112,7 +108,7 @@ class TolokaDataModule(pl.LightningDataModule):
 class MainCollator:
     def __init__(
         self,
-        tokenizer: str,
+        tokenizer,
         spec_tokens: dict,
     ):
         self.tokenizer = tokenizer
@@ -232,14 +228,6 @@ class MainCollator:
             max_length=32,
             return_tensors="pt",
         )
-        # for q, c in zip(
-        #     self.tokenizer.batch_decode(query["input_ids"]),
-        #     self.tokenizer.batch_decode(candidate["input_ids"]),
-        # ):
-        #     print(q)
-        #     print(c)
-        #     print()
-        # 0 / 0
         return {"task": task, "query": query, "candidate": candidate}
 
     def make_msg(self, msg_dict):

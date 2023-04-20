@@ -1,11 +1,10 @@
-from typing import *
-
+import os
+import pandas as pd
 import pytorch_lightning as pl
 import torch
 import torchmetrics
 import transformers
-import pandas as pd
-import os
+from typing import *
 
 
 def parse_recursive_dict(inp_dict, tokens=None):
@@ -71,6 +70,7 @@ class T5MultiTask(pl.LightningModule):
             labels=inputs["input_ids"],
             output_hidden_states=True,
         )
+
         if self.hparams.pooling == "mean":
             embeddings = self.mean_pooling(model_output, inputs["attention_mask"])
         elif self.hparams.pooling == "cls":
@@ -78,6 +78,7 @@ class T5MultiTask(pl.LightningModule):
         if self.hparams.distance == "cosine":
             embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
 
+        # add embeddings = None or else: raise if embeddings not defined
         return embeddings
 
     def training_step(self, batch: dict, batch_idx):

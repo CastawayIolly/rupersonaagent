@@ -1,11 +1,8 @@
-
-from setuptools import setup, find_packages
-
 import sys
 import subprocess
+from setuptools import setup, find_packages
 
-subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-'PyYAML'])
+subprocess.check_call([sys.executable, "-m", "pip", "install", "PyYAML"])
 import yaml
 
 with open("requirements.yml") as file_handle:
