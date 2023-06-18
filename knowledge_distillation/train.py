@@ -27,21 +27,6 @@ np.random.seed(SEED)
 torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
 
-# === Train data ===
-TRAIN_DATA_DIR = Path("data/Толока Персона Чат")
-gk_1_500_path = TRAIN_DATA_DIR / "TolokaPersonaChat_gk_1_500.jsonl"
-gk_test_1_500_path = TRAIN_DATA_DIR / "TolokaPersonaChat_1_500_gk_test.jsonl"
-test_stipa_path = TRAIN_DATA_DIR / "gk(test)Stipa.jsonl"
-genderized_gk_test_v2_path = (
-    TRAIN_DATA_DIR / "TolokaPersonaChat_genderized_gk(test)v2.jsonl"
-)
-# ==================
-
-# === Test data ===
-TEST_DATA_DIR = Path("data/test")
-all_dialogs_path = TEST_DATA_DIR / "all_dialogs.jsonl"
-# =================
-
 
 def main(hpararms: HParams):
     logger = get_logger(hpararms.experiment_path)
