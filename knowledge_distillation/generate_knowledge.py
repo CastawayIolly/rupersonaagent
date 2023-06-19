@@ -1,8 +1,6 @@
+import argparse
 import logging
 import os
-import random
-import sys
-import argparse
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -10,15 +8,11 @@ import jsonlines
 import numpy as np
 import pandas as pd
 import torch
-import torch.optim as opt
 from nltk.translate.bleu_score import SmoothingFunction, sentence_bleu
-from tqdm.auto import tqdm, trange
-from transformers.models.t5.configuration_t5 import T5Config
+from tqdm.auto import tqdm
 from transformers.models.t5.modeling_t5 import T5ForConditionalGeneration
 from transformers.models.t5.tokenization_t5 import T5Tokenizer
-
-from utils.data_preparation import make_pairs, train_val_split
-from utils.read_config import HParams, get_hparams
+from utils.data_preparation import make_pairs
 from utils.read_jsonl_data import read_jsonl_data
 
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
