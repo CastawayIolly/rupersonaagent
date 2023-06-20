@@ -7,3 +7,5 @@ generative_model/test.py
 generative_model/data/current_gk
 generative_model/data/next_answer
 generative_model/data/next_gk
+persofication/data
+persofication/parlai
