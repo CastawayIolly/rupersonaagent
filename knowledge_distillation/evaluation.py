@@ -1,6 +1,6 @@
 import argparse
 import os
-from datetime import datetime
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
@@ -12,7 +12,7 @@ from tqdm.auto import tqdm, trange
 from transformers.models.t5.modeling_t5 import T5ForConditionalGeneration
 from transformers.models.t5.tokenization_t5 import T5Tokenizer
 
-from utils.data_preparation import make_pairs, train_val_split
+from utils.data_preparation import make_pairs
 from utils.read_jsonl_data import read_jsonl_data
 
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
@@ -87,9 +87,9 @@ def main(
             ]
             for history in df_tmp[0]:
                 # Генерируем ответ и замеряем скорость
-                start_time = datetime.now()
+                start_time = time.time()
                 answer = generate_answer(history, tokenizer, model)
-                generation_times.append(datetime.now() - start_time)
+                generation_times.append(time.time() - start_time)
 
                 answer = tokenizer.tokenize(answer)
                 bleu = sentence_bleu(
@@ -97,14 +97,17 @@ def main(
                 )
                 BLEUs.append(bleu)
 
-        print(f"BLUE-4 №{generation_idx}: {np.mean(BLEUs)}±{np.std(BLEUs)}")
+        mean, std = np.round(np.mean(BLEUs), 4), np.round(np.std(BLEUs), 4)
+        print()
+        print(f"BLUE-4 №{generation_idx}: {mean}±{std}")
         total_BLEUs.extend(BLEUs)
 
-    mean, std = np.mean(total_BLEUs), np.std(total_BLEUs)
+    mean, std = np.round(np.mean(total_BLEUs), 4), np.round(np.std(total_BLEUs), 4)
     print(f"BLUE-4 total: {mean}±{std}")
-    print(
-        f"Average generation time: {np.mean(generation_times)}±{np.std(generation_times)}"
-    )
+
+    mean = np.round(np.mean(generation_times), 4)
+    std = np.round(np.std(generation_times), 4)
+    print(f"Average generation time: {mean}±{std}")
 
 
 def get_model(
