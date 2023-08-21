@@ -9,3 +9,6 @@ generative_model/data/next_answer
 generative_model/data/next_gk
 persofication/data
 persofication/parlai
+.idea
+.DS_Store
+
