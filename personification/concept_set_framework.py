@@ -4,11 +4,13 @@ import random
 from tqdm import tqdm
 
 from code_structure import SET_EXPANSION
-
-nltk.data.path.append('data/nltk_data')
 from nltk.stem import WordNetLemmatizer
 import pickle
 import torch
+
+
+nltk.data.path.append('data/nltk_data')
+
 
 _lemmatizer = WordNetLemmatizer()
 name_list = ['concept2id', 'id2concept', 'node2id', 'word2id', 'CN_hopk_graph_dict']
@@ -212,7 +214,7 @@ def cal_concept_word_probs(logits, final_pool, concept2words_map, softmax, tempe
     output_len = logits.size(1)
     # concept_probs = (jump_probs * hybrid_weights['jump'] + walk_probs * hybrid_weights['walk'])
 
-    concept_word_probs, concept_word_mask = None, None
+    concept_word_probs = None
     if final_pool is not None:
         # [bs, 2680]
         topk_concept2words_map = (final_pool.unsqueeze(-1) * concept2words_map).view(batch_size, -1)
@@ -293,7 +295,6 @@ def cal_concept_word_probs_attention(embed, hidden, final_pool, concept2words_ma
         batch_size, -1, 7)
 
     tempt_probs = torch.tensor(lm_word_probs)
-    topk = top_concept2word_map.size(1)
 
     tempt_probs[:, :, 0] = 0
     top_concept_word_p = torch.gather(dim=-1,
@@ -378,7 +379,7 @@ def cal_concept2word_map(word_concept_map, device):
     # return concept_word_mask
 
 
-## one example for kw model
+# one example for kw model
 def prepare_example_for_kw_model(history, text, dict):
     context, last_two_utters = process_context(history, text, dict)
     last_two_utters_keywords = extract_concepts(context, 20)
@@ -386,7 +387,7 @@ def prepare_example_for_kw_model(history, text, dict):
     return last_two_utters, last_two_utters_keywords, last_two_utters_concepts
 
 
-## one batch for kw model
+# one batch for kw model
 def prepare_batch_for_kw_model(obs, device):
     inputs_for_kw_model = {}
 
@@ -402,7 +403,7 @@ def prepare_batch_for_kw_model(obs, device):
         inputs_for_kw_model['batch_context_keywords'] = batch_context_keywords
         inputs_for_kw_model['batch_context_concepts'] = batch_context_concepts
         inputs_for_kw_model['CN_hopk_edge_index'] = CN_hopk_edge_index
-    except:
+    except Exception:
         inputs_for_kw_model = None
     return inputs_for_kw_model
 
@@ -612,13 +613,11 @@ def visualize_samples(data_for_visualization, dict, valid_inds, observations):
     final_pool = data_for_visualization[i]['final_pool']
     concept_word_probs = data_for_visualization[i]['concept_word_probs']
     hybrid_word_probs = data_for_visualization[i]['hybrid_word_probs']
-    lm_word_probs = data_for_visualization[i]['lm_word_probs']
     gate = data_for_visualization[i]['gate'].squeeze(-1).tolist()
 
     #  construct visulization strings
     line_outputs = dict.vec2words(prediction.tolist())
     vis_prediction = ' '.join(['{:>5}'.format(i) for i in line_outputs])
-    vis_lm_word_probs = visualize_topk_nodes_with_values(lm_word_probs, dict, k=5, concept=False, matrix=True)
     vis_concept_word_probs = visualize_topk_nodes_with_values(concept_word_probs, dict, k=5, concept=False,
                                                               matrix=True)
     vis_hybrid_word_probs = visualize_topk_nodes_with_values(hybrid_word_probs, dict, k=5, concept=False,

@@ -125,10 +125,11 @@ class Gpt2SeqModel(nn.Module):
                     concept2words_map=concept2words_map,
                     model=self)
 
-                gate = self.sigmoid(self.gate_linear_hidden(hidden_states[..., src_seq_len:-1, :]) + \
-                                    self.gate_linear_concept(concept_word_embed))
-
-
+                gate = self.sigmoid(
+                    self.gate_linear_hidden(hidden_states[..., src_seq_len:-1, :]) + self.gate_linear_concept(
+                        concept_word_embed
+                    )
+                )
             else:
                 clm_logits, clm_hidden_states = self.CLM(input_seq_CLM)
                 clm_logits = clm_logits[:, :-1, :]
@@ -148,8 +149,6 @@ class Gpt2SeqModel(nn.Module):
             positive_score = self.linear(self.dropout(last_state))
 
             predictions = hybrid_word_probs.argmax(dim=-1)
-
-
         else:
             prior_context = torch.cat([src_seq, start_tensor], dim=1)
             if self.use_dis and src_seq_dis is not None:
@@ -176,18 +175,17 @@ class Gpt2SeqModel(nn.Module):
                                                                                      use_attention=use_attention)
                 # gate = self.sigmoid(self.gate_linear_hidden(hidden_states))
                 gate = None
-
-
             elif self.training:  # FCG Bot B
-                predictions, hybrid_word_probs, hidden_states = self.train_greedy_decoding(batch_size, prior_context,
-                                                                                           prior_dis,
-                                                                                           concept2words_map=concept2words_map,
-                                                                                           final_pool=final_pool,
-                                                                                           use_attention=use_attention)
+                predictions, hybrid_word_probs, hidden_states = self.train_greedy_decoding(
+                    batch_size,
+                    prior_context,
+                    prior_dis,
+                    concept2words_map=concept2words_map,
+                    final_pool=final_pool,
+                    use_attention=use_attention
+                )
                 # gate = self.sigmoid(self.gate_linear_hidden(hidden_states))
                 gate = None
-
-
             elif self.beam_size > 1:
                 # idea interface: modified
                 predictions, hidden_states, data_for_visualization = self.beam_search(batch_size, prior_context,
@@ -198,8 +196,6 @@ class Gpt2SeqModel(nn.Module):
                                                                                       use_attention=use_attention)
                 # gate = self.sigmoid(self.gate_linear_hidden(hidden_states))
                 gate = None
-
-
             else:  # hits@1
                 predictions, hidden_states, data_for_visualization = self.greedy_decoding(batch_size, prior_context,
                                                                                           prior_dis, walk_probs,
@@ -278,7 +274,8 @@ class Gpt2SeqModel(nn.Module):
                     cand_scores = torch.cat(cand_scores, dim=0)
                     cand_preds = cand_scores.sort(1, True)[1]
 
-        return predictions, hybrid_word_probs, cand_preds, cand_scores, gate, data_for_visualization, positive_score, negative_score
+        return predictions, hybrid_word_probs, cand_preds, cand_scores, gate, \
+            data_for_visualization, positive_score, negative_score
 
     # TODO: we do not do any penalty
     def _length_penalty(self, sequence_lengths):
@@ -292,7 +289,6 @@ class Gpt2SeqModel(nn.Module):
         is_end = torch.zeros(batch_size, dtype=torch.bool, device=device)
         pred_output = torch.zeros((batch_size, self.longest_label), dtype=torch.long, device=device)
         past_input = prior_context
-        src_seq_len = past_input.size(-1)
         past_dis = prior_dis
         with torch.no_grad():
             for step in range(self.longest_label):
@@ -301,7 +297,7 @@ class Gpt2SeqModel(nn.Module):
                 last_logits = logits[:, -1, :] / self.temperature
                 # log_probs = F.log_softmax(logits, dim=-1)
 
-                ### idea interface ###
+                # idea interface ###
                 gate = self.sigmoid(self.gate_linear_hidden(hidden_states[:, -1, :]))
                 lm_word_probs = cal_lm_word_probs(logits=last_logits.unsqueeze(1), softmax=self.softmax)
                 concept_word_probs = cal_concept_word_probs(logits=last_logits.unsqueeze(1),
@@ -394,10 +390,11 @@ class Gpt2SeqModel(nn.Module):
                     final_pool=final_pool, softmax=self.softmax,
                     concept2words_map=concept2words_map,
                     model=self)
-                gate = self.sigmoid(self.gate_linear_hidden(hidden_states[:, -1, :].unsqueeze(1)) + \
-                                    self.gate_linear_concept(concept_word_embed))
-
-
+                gate = self.sigmoid(
+                    self.gate_linear_hidden(hidden_states[:, -1, :].unsqueeze(1)) + self.gate_linear_concept(
+                        concept_word_embed
+                    )
+                )
             else:
                 concept_word_probs = cal_concept_word_probs(logits=logits.unsqueeze(1),
                                                             final_pool=final_pool,
@@ -495,10 +492,11 @@ class Gpt2SeqModel(nn.Module):
                     final_pool=final_pool, softmax=self.softmax,
                     concept2words_map=concept2words_map,
                     model=self)
-                gate = self.sigmoid(self.gate_linear_hidden(hidden_states[:, -1, :].unsqueeze(1)) + \
-                                    self.gate_linear_concept(concept_word_embed))
-
-
+                gate = self.sigmoid(
+                    self.gate_linear_hidden(hidden_states[:, -1, :].unsqueeze(1)) + self.gate_linear_concept(
+                        concept_word_embed
+                    )
+                )
             else:
                 concept_word_probs = cal_concept_word_probs(logits=logits2.unsqueeze(1),
                                                             final_pool=final_pool,
@@ -619,10 +617,12 @@ class Gpt2SeqModel(nn.Module):
                         final_pool=final_pool, softmax=self.softmax,
                         concept2words_map=concept2words_map,
                         model=self)
-                    gate = self.sigmoid(self.gate_linear_hidden(hidden_states[:, -1, :].unsqueeze(1)) + \
-                                        self.gate_linear_concept(concept_word_embed))
+                    gate = self.sigmoid(
+                        self.gate_linear_hidden(hidden_states[:, -1, :].unsqueeze(1)) + self.gate_linear_concept(
+                            concept_word_embed
 
-
+                        )
+                    )
                 else:
                     clm_logits, clm_hidden_states = self.CLM(token_tensor_CLM)
                     clm_logits = clm_logits[:, -1, :]
@@ -664,9 +664,12 @@ class Gpt2SeqModel(nn.Module):
                     else:
                         banned_tokens = [[] for bbsz_idx in range(batch_size * self.beam_size)]
 
+                    bbsz_idx: int
                     for bbsz_idx in range(batch_size * self.beam_size):
-                        log_probs[bbsz_idx, banned_tokens[bbsz_idx]] = log_probs[
-                                                                           bbsz_idx, banned_tokens[bbsz_idx]] * 100
+                        log_probs[
+                            bbsz_idx,
+                            banned_tokens[bbsz_idx]
+                        ] = log_probs[bbsz_idx, banned_tokens[bbsz_idx]] * 100
 
                 log_probs = log_probs.view(batch_size, self.beam_size, -1)
 
@@ -777,10 +780,11 @@ class Gpt2SeqModel(nn.Module):
                             concept2words_map=concept2words_map,
                             model=self)
 
-                        gate = self.sigmoid(self.gate_linear_hidden(best_hidden_states.unsqueeze(0)) + \
-                                            self.gate_linear_concept(concept_word_embed))
-
-
+                        gate = self.sigmoid(
+                            self.gate_linear_hidden(best_hidden_states.unsqueeze(0)) + self.gate_linear_concept(
+                                concept_word_embed
+                            )
+                        )
                     else:
                         concept_word_probs = cal_concept_word_probs(
                             logits=best_logits.unsqueeze(0),

@@ -19,11 +19,11 @@ def setup_args(parser=None):
         parser = ParlaiParser(True, True)
     dict_loop = parser.add_argument_group('Dictionary Loop Arguments')
     dict_loop.add_argument('--dict-maxexs', default=-1, type=int,
-        help='max number of examples to build dict on')
+                           help='max number of examples to build dict on')
     dict_loop.add_argument('--dict-include-valid', default=False, type='bool',
-        help='Include validation set in dictionary building for task.')
+                           help='Include validation set in dictionary building for task.')
     dict_loop.add_argument('--dict-include-test', default=False, type='bool',
-        help='Include test set in dictionary building for task.')
+                           help='Include test set in dictionary building for task.')
     dict_loop.add_argument('-ltim', '--log-every-n-secs', type=float, default=2)
     partial, _ = parser.parse_known_args(nohelp=True)
     if vars(partial).get('dict_class'):
@@ -38,8 +38,8 @@ def build_dict(opt, skip_if_built=False):
         print('[ Deprecated Warning: should be passed opt not Parser ]')
         opt = opt.parse_args()
     if not opt.get('dict_file'):
-        print('Tried to build dictionary but `--dict-file` is not set. Set ' +
-              'this param so the dictionary can be saved.')
+        print('Tried to build dictionary but `--dict-file` is not set. Set ' + 'this param '
+                                                                               'so the dictionary can be saved.')
         return
 
     if skip_if_built and os.path.isfile(opt['dict_file']):
@@ -92,7 +92,7 @@ def build_dict(opt, skip_if_built=False):
             world_dict.parley()
             if log_time.time() > log_every_n_secs:
                 sys.stdout.write('\r')
-                text, _log = log_time.log(cnt, max(opt.get('dict_maxexs',0),
+                text, _log = log_time.log(cnt, max(opt.get('dict_maxexs', 0),
                                                    world_dict.num_examples()))
                 sys.stdout.write(text)
                 sys.stdout.flush()

@@ -2,14 +2,11 @@
 from code_structure import REWARD, LM_REWARD, COMMON_GROUND_REWARD, MUTUAL_BENEFIT_REWARD
 from concept_set_framework import standardization, normalization
 from parlai.core.agents import _create_task_agents
-from parlai.core.worlds import DialogPartnerWorld, BatchWorld
+from parlai.core.worlds import DialogPartnerWorld
 import numpy as np
-from parlai.core.worlds import create_agents_from_shared
 import random
 from copy import deepcopy
 import torch
-import math
-import torch.nn.functional as F
 
 
 def validate(observation):
@@ -152,7 +149,7 @@ class SelfPlayWorld(DialogPartnerWorld):
             sep_a = a_text.rfind('\n')
             b_text = obs_start_b['text']
             sep_b = b_text.rfind('\n')
-            persona_a_text, first_mess_a = a_text[:sep_a], a_text[sep_a:]
+            persona_a_text = a_text[:sep_a]
             persona_b_text, first_mess_b = b_text[:sep_b], b_text[sep_b:]
 
             # reconstruct
@@ -214,9 +211,7 @@ class SelfPlayWorld(DialogPartnerWorld):
 
             REWARD()
             weights = self.opt.get('weights')
-            reward_a_list = weights[0] * self_mutual_benefit_reward + \
-                            weights[1] * self_common_ground_reward + \
-                            weights[2] * self_language_reward
+            reward_a_list = weights[0] * self_mutual_benefit_reward + weights[1] * self_common_ground_reward + weights[2] * self_language_reward
             reward_a_list = standardization(reward_a_list)
 
             if is_display:

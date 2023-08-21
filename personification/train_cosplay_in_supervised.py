@@ -7,7 +7,6 @@
 These parameters have some variance in their final perplexity, but they were
 used to achieve the pre-trained model.
 """
-import os
 import random
 import torch
 from agents.cosplay.cosplay import ARCH_CHOICE

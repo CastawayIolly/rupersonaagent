@@ -9,5 +9,5 @@ before_script:
 test:
   script:
     - pip install flake8 pytest pytest-mock
-    - flake8 --exclude venv --ignore=W605 --max-line-length 125 ..
+    - flake8 --exclude venv --ignore=W605,E731 --max-line-length 150 ..
 

@@ -5,11 +5,10 @@ from collections import deque, defaultdict
 from copy import deepcopy
 import numpy as np
 import torch
-import torch.nn.functional as F
 
 from code_structure import LOAD_CONCEPT_DIST_MATRIX, CALCULATE_CONCEPT_SET, COSPLAY_PRED, COMMON_GROUND_REWARD, \
     PERSONA_RECALL_SCORE
-from parlai.core.agents import Agent, create_agent
+from parlai.core.agents import Agent
 from parlai.core.dict import DictionaryAgent
 from parlai.core.thread_utils import SharedTable
 from agents.cosplay.cosplay import ARCH_CHOICE
@@ -26,7 +25,6 @@ from agents.cosplay.gpt.optim import GPTOptimizer
 from torch import autograd
 from os import path
 
-import json
 from agents.cosplay_rl.utils import LanguageModel
 from concept_set_framework import prepare_example_persona_kws, prepare_example_for_kw_model, cal_concept2word_map, \
     cal_concept_set, load_concept_dist_matrix, create_concept_dist_matrix, set_union_operation, set_dist_operation, \
@@ -332,10 +330,10 @@ class CosplayRLAgent(Agent):
             # get index of null token from dictionary (probably 0)
             self.NULL_IDX = self.dict[self.dict.null_token]
 
-            cosplay_status, receiver_status, language_status = {}, {}, {}
+            cosplay_status, language_status = {}, {}
 
             # model initialization
-            init_cosplay, init_receiver = None, None
+            init_cosplay = None
             if opt.get('init_model_cosplay') and os.path.isfile(opt['init_model_cosplay']):
                 init_cosplay = opt['init_model_cosplay']
 
@@ -574,8 +572,8 @@ class CosplayRLAgent(Agent):
             # idea interface
             # self.history[labels]
 
-            if 'Cosplay' in act[0]['id'] and 'init' not in self.observation[0][
-                'id']:  # Only add dialogue text excluding the persona text
+            if 'Cosplay' in act[0]['id'] and 'init' not in self.observation[0]['id']:  # Only add dialogue
+                # text excluding the persona text
                 if len(self.send_messages) == 0:  # At the beginning of an episode
                     if len(self.receive_messages) == 0:  # The first speaker receive no text before it first speaks
                         self.is_first_speaker = True
@@ -594,8 +592,8 @@ class CosplayRLAgent(Agent):
     def batch_act(self, observations):
         # DEBUG track gpu
         reply = [{'id': self.getID(), 'episode_done': False} for _ in range(self.batch_size)]
-        src_seq, src_seq_turn, src_seq_dis, tgt_seq, tgt_seq_turn, labels, valid_inds, cands, valid_cands, is_training = self.cosplay_vectorize(
-            observations)
+        src_seq, src_seq_turn, src_seq_dis, tgt_seq, tgt_seq_turn, labels, valid_inds, cands, \
+            valid_cands, is_training = self.cosplay_vectorize(observations)
 
         # idea interface
         persona_set = prepare_batch_persona_concept_mask(observations, device=self.device)
@@ -671,7 +669,8 @@ class CosplayRLAgent(Agent):
                     # idea interface
                     # if self.answers[0] is not None:
                     #     if self.use_talk_tokens:
-                    #         # idea modified ob['text'] = SpecialToken.talk_1_start + ' ' + text_split[-1] + ' ' + SpecialToken.talk_1_end
+                    #         # idea modified ob['text'] = SpecialToken.talk_1_start + ' ' + text_split[-1] + ' ' +
+                    #         SpecialToken.talk_1_end
                     #         ob['text'] = SpecialToken.talk_1_start + ' ' + self.answers[
                     #             ob_ind] + ' ' + SpecialToken.talk_1_end
                     #     else:
@@ -788,7 +787,7 @@ class CosplayRLAgent(Agent):
                                                final_pool=final_pool,
                                                visualization=visualization,
                                                use_attention=use_attention)
-                    predictions, hybrid_probs, cand_preds, gate = out[0], out[1], out[2], out[4]
+                    predictions, hybrid_probs, cand_preds = out[0], out[1], out[2]
                     # idx = predictions.unsqueeze(dim=2)
                     # loss = self.criterion(scores, idx)
 
@@ -1140,7 +1139,7 @@ class CosplayRLAgent(Agent):
         receive_messages_list = deepcopy(self.receive_messages)
         send_messages_list = deepcopy(self.send_messages)
 
-        ## remove the <end> from message for later robust splitting
+        # remove the <end> from message for later robust splitting
         receive_messages_list = [[message.replace(self.dict.end_token, '') for message in interaction]
                                  for interaction in receive_messages_list]
         send_messages_list = [[message.replace(self.dict.end_token, '') for message in interaction]

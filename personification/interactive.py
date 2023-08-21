@@ -23,7 +23,6 @@ from parlai.agents.repeat_label.repeat_label import RepeatLabelAgent
 from parlai.agents.local_human.local_human import LocalHumanAgent
 
 import random
-import os
 
 pretrained_model_file = 'models/reinforced/cosplay.model'
 

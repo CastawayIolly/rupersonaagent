@@ -1,7 +1,3 @@
-import json
-import os
-
-
 def build_data(self_non_original, save_path):
     with open(self_non_original, "r", encoding="utf8") as f:
         dialogues = []

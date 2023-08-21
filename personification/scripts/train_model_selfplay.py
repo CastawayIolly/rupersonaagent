@@ -21,7 +21,7 @@ from copy import deepcopy
 def _setup_op(opt, component='transmitter'):
     assert component in ['transmitter', 'utils']
     new_opt = deepcopy(opt)
-    for k,v in opt.items():
+    for k, v in opt.items():
         if k.endswith(component):
             new_k = k[:-len(component) - 1]
             new_opt[new_k] = v
@@ -151,7 +151,8 @@ class TrainLoop():
         self.max_num_epochs = opt['num_epochs'] if opt['num_epochs'] > 0 else float('inf')
         self.max_train_time = opt['max_train_time'] if opt['max_train_time'] > 0 else float('inf')
         self.log_every_n_secs = opt['log_every_n_secs'] if opt['log_every_n_secs'] > 0 else float('inf')
-        self.train_dis_every_n_secs = opt['train_display_every_n_secs'] if opt['train_display_every_n_secs'] > 0 else float('inf')
+        self.train_dis_every_n_secs = opt['train_display_every_n_secs'] \
+            if opt['train_display_every_n_secs'] > 0 else float('inf')
         self.val_every_n_secs = opt['validation_every_n_secs'] if opt['validation_every_n_secs'] > 0 else float('inf')
         self.save_every_n_secs = opt['save_every_n_secs'] if opt['save_every_n_secs'] > 0 else float('inf')
         self.valid_optim = 1 if opt['validation_metric_mode'] == 'max' else -1
@@ -193,7 +194,7 @@ class TrainLoop():
             print('[ new best {}: {}{} ]'.format(
                 opt['validation_metric'], new_valid,
                 ' (previous best was {})'.format(self.best_valid)
-                    if self.best_valid is not None else ''))
+                if self.best_valid is not None else ''))
             self.best_valid = new_valid
             self.impatience = 0
             if opt.get('model_file'):
@@ -210,8 +211,8 @@ class TrainLoop():
         else:
             self.impatience += 1
             print('[ did not beat best {}: {} impatience: {} ]'.format(
-                    opt['validation_metric'], round(self.best_valid, 4),
-                    self.impatience))
+                opt['validation_metric'], round(self.best_valid, 4),
+                self.impatience))
         self.validate_time.reset()
         if 0 < opt['validation_patience'] <= self.impatience:
             print('[ ran out of patience! stopping training. ]')
@@ -233,10 +234,10 @@ class TrainLoop():
 
         if 'time_left' in train_report:
             logs.append('time_left:{}s'.format(
-                         math.floor(train_report.pop('time_left', ""))))
+                math.floor(train_report.pop('time_left', ""))))
         if 'num_epochs' in train_report:
             logs.append('num_epochs:{}'.format(
-                         train_report.pop('num_epochs', '')))
+                train_report.pop('num_epochs', '')))
         log = '[ {} ] {}'.format(' '.join(logs), train_report)
         print(log)
         self.log_time.reset()

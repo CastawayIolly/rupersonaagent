@@ -1,6 +1,5 @@
 import torch
 from torch.optim import Optimizer
-from torch.optim import Adam
 from torch.optim.optimizer import required
 from torch.nn.utils import clip_grad_norm_
 from parlai.core.utils import _ellipse

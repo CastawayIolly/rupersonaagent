@@ -34,15 +34,6 @@ import torch
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-import os
-import json
-import random
-from collections import namedtuple, Counter
-
-import torch
-import numpy as np
-from scipy.interpolate import RectBivariateSpline
-from torch.utils.checkpoint import checkpoint
 
 
 class Beam(object):
@@ -75,12 +66,10 @@ class Beam(object):
         # backtracking id to hypothesis at previous time step
         self.bookkeep = []
         # output tokens at each time step
-        self.outputs = [torch.Tensor(self.beam_size).long()
-                            .fill_(padding_token).to(self.device)]
+        self.outputs = [torch.Tensor(self.beam_size).long().fill_(padding_token).to(self.device)]
         # keeps tuples (score, time_step, hyp_id)
         self.finished = []
-        self.HypothesisTail = namedtuple(
-            'HypothesisTail', ['timestep', 'hypid', 'score', 'tokenid'])
+        self.HypothesisTail = namedtuple('HypothesisTail', ['timestep', 'hypid', 'score', 'tokenid'])
         self.eos_top = False
         self.eos_top_ts = None
         self.n_best_counter = 0
@@ -101,8 +90,7 @@ class Beam(object):
         else:
             # we need to sum up hypo scores and curr softmax scores before topk
             # [beam_size, voc_size]
-            beam_scores = (softmax_probs +
-                           self.scores.unsqueeze(1).expand_as(softmax_probs))
+            beam_scores = (softmax_probs + self.scores.unsqueeze(1).expand_as(softmax_probs))
             for i in range(self.outputs[-1].size(0)):
                 #  if previous output hypo token had eos
                 # we penalize those word probs to never be chosen
@@ -271,11 +259,10 @@ class Beam(object):
                             color = n_best_colors[i]
                         rank = i
                         break
-                label = (
-                        "<{}".format(dictionary.vec2txt([token])
-                                     if dictionary is not None else token) +
-                        " : " +
-                        "{:.{prec}f}>".format(all_scores[tstep][hypid], prec=3))
+                label = ("<{}".format(
+                    dictionary.vec2txt([token])
+                    if dictionary is not None else token
+                ) + " : " + "{:.{prec}f}>".format(all_scores[tstep][hypid], prec=3))
 
                 graph.add_node(pydot.Node(
                     node_tail.__repr__(), label=label, fillcolor=color,
@@ -404,8 +391,7 @@ def maintain_dialog_history(history, observation, reply='', persona_append_strat
     cur_turn = history['cur_turn']
 
     if use_reply != 'none':
-        if use_reply == 'model' or (use_reply == 'label_else_model' and
-                                    len(history['labels']) == 0):
+        if use_reply == 'model' or (use_reply == 'label_else_model' and len(history['labels']) == 0):
             if reply:
                 # idea drop
                 pass
@@ -701,8 +687,7 @@ class SharedTable(MutableMapping):
                     self.tensors[k] = v
                     continue
                 elif type(v) not in sizes:
-                    raise TypeError('SharedTable does not support values of ' +
-                                    'type ' + str(type(v)))
+                    raise TypeError('SharedTable does not support values of ' + 'type ' + str(type(v)))
                 sizes[type(v)] += 1
             # pop tensors from init_dict
             for k in self.tensors.keys():
@@ -763,9 +748,10 @@ class SharedTable(MutableMapping):
         if key in self.idx:
             idx, typ = self.idx[key]
             if typ != val_type:
-                raise TypeError(('Cannot change stored type for {key} from ' +
-                                 '{v1} to {v2}. You need to del the key first' +
-                                 ' if you need to change value types.'
+                raise TypeError(('Cannot change stored type for {key} from ' + '{v1} to {v2}. You need'
+                                                                               ' to del the key first' + ' if you need'
+                                                                                                         ' to change '
+                                                                                                         'value types.'
                                  ).format(key=key, v1=typ, v2=val_type))
             self.arrays[typ][idx] = value
         else:

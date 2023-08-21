@@ -1,9 +1,5 @@
-from parlai.core.dict import DictionaryAgent
-import copy
 from parlai.core.params import ParlaiParser
 from parlai.scripts.build_dict import build_dict
-from collections import defaultdict
-import os
 
 
 class SpecialToken:

@@ -123,7 +123,8 @@ class Seq2seqModel(nn.Module):
         hidden_size = enc_out.size(-1)
         return enc_out.view(batch_size * beam_size, -1, hidden_size)
 
-    def forward(self, src_seq, src_seq_turn=None, src_seq_dis=None, tgt_seq=None, tgt_seq_turn=None, cands=None, valid_cands=None, prev_enc=None,
+    def forward(self, src_seq, src_seq_turn=None, src_seq_dis=None, tgt_seq=None,
+                tgt_seq_turn=None, cands=None, valid_cands=None, prev_enc=None,
                 rank_during_training=False, beam_size=1, topk=1):
         """Get output predictions from the model.
 
@@ -572,8 +573,7 @@ class Linear(nn.Module):
         if not self.shared:
             self.weight = Parameter(torch.Tensor(out_features, in_features))
         else:
-            if (shared_weight.size(0) != out_features or
-                    shared_weight.size(1) != in_features):
+            if (shared_weight.size(0) != out_features or shared_weight.size(1) != in_features):
                 raise RuntimeError('wrong dimensions for shared weights')
             self.weight = shared_weight
 
@@ -601,9 +601,7 @@ class Linear(nn.Module):
         return F.linear(input, weight, self.bias)
 
     def __repr__(self):
-        return self.__class__.__name__ + ' (' \
-               + str(self.in_features) + ' -> ' \
-               + str(self.out_features) + ')'
+        return self.__class__.__name__ + ' (' + str(self.in_features) + ' -> ' + str(self.out_features) + ')'
 
 
 class RandomProjection(nn.Module):

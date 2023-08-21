@@ -1,9 +1,5 @@
 import torch
-import math
-from agents.common.dict_helper import SpecialToken
 import torch.nn.functional as F
-from agents.cosplay.cosplay import Gpt2SeqModel
-import numpy as np
 from pytorch_pretrained_bert import OpenAIGPTLMHeadModel
 
 

@@ -14,7 +14,6 @@ import torch.nn as nn
 from os import path
 
 from collections import deque, defaultdict
-import json
 import os
 import math
 import pickle
@@ -46,10 +45,10 @@ def print_model(model):
     params = list(model.parameters())
     for i in params:
         if i.requires_grad:
-            l = 1
+            le = 1
             for j in i.size():
-                l *= j
-            k = k + l
+                le *= j
+            k = k + le
     print("Total Parameter Size：" + str(k))
 
 
@@ -358,7 +357,6 @@ class TransformerAgent(Agent):
             self.NULL_IDX = self.dict[self.dict.null_token]
 
             # get vocab size
-            vocab_size = len(self.dict.tok2ind.items())
             LOAD_MODEL()
             if ARCH_CHOICE == 'lstm':
                 self.model = Seq2seqModel(opt=opt,
@@ -447,8 +445,6 @@ class TransformerAgent(Agent):
             else:
                 self.receiver = None
                 self.receiver_dict = None
-
-        vocab_size = len(self.dict.tok2ind.items())
 
         if opt['smoothing'] > 0.0:
             self.criterion = LabelSmoothingLoss(vocabulary_size=40516,
@@ -757,7 +753,7 @@ class TransformerAgent(Agent):
                 pos_label = torch.tensor([1] * positive_score.size(0), device=positive_score.device)
                 neg_label = torch.tensor([0] * negative_score.size(0), device=positive_score.device)
 
-                ### idea interface ###
+                # idea interface ###
                 gate_loss_fn = nn.BCELoss(weight=gate_mask.view(-1), reduction='mean')
                 gate_loss = gate_loss_fn(gate.view(-1), gate_label.view(-1).float())
 
@@ -919,15 +915,14 @@ class TransformerAgent(Agent):
             if self.use_cuda:
                 sampling_cands = sampling_cands.cuda()
 
-        return src_seq, src_seq_turn, src_seq_dis, tgt_seq, tgt_seq_turn, labels, valid_inds, cands, valid_cands, sampling_cands, is_training
+        return src_seq, src_seq_turn, src_seq_dis, tgt_seq, tgt_seq_turn, \
+            labels, valid_inds, cands, valid_cands, sampling_cands, is_training
 
     def init_cuda_buffer(self, batchsize):
         if self.use_cuda and not hasattr(self, 'buffer_initialized'):
             try:
                 print('preinitializing pytorch cuda buffer')
                 bsz = self.opt.get('batchsize', batchsize)
-                input_dummy = torch.ones(bsz, self.encode_max_seq_len).long().cuda()
-                output_dummy = torch.ones(bsz, 1).long().cuda()
                 # sc = self.model.forward(input_dummy, None, None, output_dummy, None)[1]
                 # if self.opt['datatype'] == 'train':
                 #     loss = self.criterion(sc, output_dummy)
@@ -952,8 +947,8 @@ class TransformerAgent(Agent):
         # e.g. for input [{}, {'text': 'hello'}, {}, {}], valid_inds is [1]
         # since the other three elements had no 'text' field
         LOAD_BATCH()
-        src_seq, src_seq_turn, src_seq_dis, tgt_seq, tgt_seq_turn, labels, valid_inds, cands, valid_cands, sampling_cands, is_training = self.vectorize(
-            observations)
+        src_seq, src_seq_turn, src_seq_dis, tgt_seq, tgt_seq_turn, \
+            labels, valid_inds, cands, valid_cands, sampling_cands, is_training = self.vectorize(observations)
 
         # idea
         persona_set = prepare_batch_persona_concept_mask(observations, device=self.device)
@@ -1001,9 +996,8 @@ class TransformerAgent(Agent):
                 answers=self.answers, ys=tgt_seq.data if tgt_seq is not None else None,
                 vis=data_for_visualization)
 
-        if is_training is False and self.opt.get(
-                'eval_c_recall') is None and self.opt.get(
-            'visualization') and data_for_visualization is not None and len(data_for_visualization) > 0:
+        if is_training is False and self.opt.get('eval_c_recall') is None and self.opt.get('visualization') \
+                and data_for_visualization is not None and len(data_for_visualization) > 0:
             visualize_samples(data_for_visualization, self.dict, valid_inds, observations)
 
         if cand_preds is not None:
