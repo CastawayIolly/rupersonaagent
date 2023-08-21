@@ -1,11 +1,8 @@
-from typing import *
-
 import pytorch_lightning as pl
 import torch
 import torchmetrics
 import transformers
-import pandas as pd
-import os
+from typing import Literal
 
 
 def parse_recursive_dict(inp_dict, tokens=None):
@@ -71,6 +68,7 @@ class T5MultiTask(pl.LightningModule):
             labels=inputs["input_ids"],
             output_hidden_states=True,
         )
+
         if self.hparams.pooling == "mean":
             embeddings = self.mean_pooling(model_output, inputs["attention_mask"])
         elif self.hparams.pooling == "cls":
@@ -78,6 +76,7 @@ class T5MultiTask(pl.LightningModule):
         if self.hparams.distance == "cosine":
             embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
 
+        # add embeddings = None or else: raise if embeddings not defined
         return embeddings
 
     def training_step(self, batch: dict, batch_idx):
@@ -91,10 +90,9 @@ class T5MultiTask(pl.LightningModule):
             # Compute similarity scores
             scores = torch.mm(query, candidate.transpose(0, 1)) * self.hparams.scale
             # Symmetric loss as in CLIP
-            loss = (
-                self.cross_entropy_loss(scores, labels)
-                + self.cross_entropy_loss(scores.transpose(0, 1), labels)
-            ) / 2
+            loss = (self.cross_entropy_loss(scores, labels) + self.cross_entropy_loss(
+                scores.transpose(0, 1),
+                labels)) / 2
             # metrics
             preds = scores.view(-1).cpu()
             targets = batch["labels"].reshape(preds.shape)
@@ -164,7 +162,7 @@ class T5MultiTask(pl.LightningModule):
             # Compute embeddings
             query = self.get_embedding(batch["query"])
             candidate = self.get_embedding(batch["candidate"])
-            labels = torch.argmax(batch["labels"], dim=-1)
+            # labels = torch.argmax(batch["labels"], dim=-1)
             # Compute similarity scores
             scores = torch.mm(query, candidate.transpose(0, 1)) * self.hparams.scale
             # Symmetric loss as in CLIP

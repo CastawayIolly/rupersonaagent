@@ -1,12 +1,9 @@
-
-from setuptools import setup, find_packages
-
 import sys
 import subprocess
-
-subprocess.check_call([sys.executable, '-m', 'pip', 'install',
-'PyYAML'])
+from setuptools import setup, find_packages
 import yaml
+
+subprocess.check_call([sys.executable, "-m", "pip", "install", "PyYAML"])
 
 with open("requirements.yml") as file_handle:
     environment_data = yaml.full_load(file_handle)
