@@ -1,10 +1,8 @@
-import os
-import pandas as pd
 import pytorch_lightning as pl
 import torch
 import torchmetrics
 import transformers
-from typing import *
+from typing import Literal
 
 
 def parse_recursive_dict(inp_dict, tokens=None):
@@ -92,10 +90,9 @@ class T5MultiTask(pl.LightningModule):
             # Compute similarity scores
             scores = torch.mm(query, candidate.transpose(0, 1)) * self.hparams.scale
             # Symmetric loss as in CLIP
-            loss = (
-                self.cross_entropy_loss(scores, labels)
-                + self.cross_entropy_loss(scores.transpose(0, 1), labels)
-            ) / 2
+            loss = (self.cross_entropy_loss(scores, labels) + self.cross_entropy_loss(
+                scores.transpose(0, 1),
+                labels)) / 2
             # metrics
             preds = scores.view(-1).cpu()
             targets = batch["labels"].reshape(preds.shape)
@@ -165,7 +162,7 @@ class T5MultiTask(pl.LightningModule):
             # Compute embeddings
             query = self.get_embedding(batch["query"])
             candidate = self.get_embedding(batch["candidate"])
-            labels = torch.argmax(batch["labels"], dim=-1)
+            # labels = torch.argmax(batch["labels"], dim=-1)
             # Compute similarity scores
             scores = torch.mm(query, candidate.transpose(0, 1)) * self.hparams.scale
             # Symmetric loss as in CLIP
