@@ -11,15 +11,18 @@ from hamcrest import assert_that, equal_to
 
 @pytest.mark.generative
 class TestGenerativeModel:
-    self.tokenizer = transformers.AutoTokenizer.from_pretrained("cointegrated/rut5-base-multitask", truncation_side='left', padding_side='right')
-    self.t5 = transformers.T5ForConditionalGeneration.from_pretrained("cointegrated/rut5-base-multitask", resume_download=True)
+    self.tokenizer = transformers.AutoTokenizer.from_pretrained("cointegrated/rut5-base-multitask",
+                                                                truncation_side='left',
+                                                                padding_side='right')
+    self.t5 = transformers.T5ForConditionalGeneration.from_pretrained("cointegrated/rut5-base-multitask",
+                                                                      resume_download=True)
 
     with open('/home/stc/persona/data/preprocessing/spec_tokens.json') as spec_tokens_config:
         spec_tokens = json.load(spec_tokens_config)
     self.tokenizer.add_special_tokens(
-            {"additional_special_tokens": [spec_tokens[k] for k in spec_tokens]}
-        )
-    self.datamodule=TolokaDataModule(
+        {"additional_special_tokens": [spec_tokens[k] for k in spec_tokens]}
+    )
+    self.datamodule = TolokaDataModule(
         data_dir='/home/stc/persona/data',
         datasets=['current_gk', 'next_answer'],
         tokenizer=self.tokenizer,
