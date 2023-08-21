@@ -75,9 +75,6 @@ with open("data/new.jsonl", "w", encoding="utf-8") as out:
                         elif word_parse.tag.POS == "NUMR":
                             ngram.append(word_parse.normal_form)
                             ngram.append(word_parse2.normal_form)
-                        elif word == "[0-9]*":
-                            ngram.append(word_parse.normal_form)
-                            ngram.append(word_parse2.normal_form)
                         elif is_npro_descr:
                             ngram.append(word_parse2.normal_form)
 

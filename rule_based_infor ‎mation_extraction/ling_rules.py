@@ -34,46 +34,35 @@ def get_morph_tags(lex_dep, lex_dep2):
 
 # nounroot rule
 def nounroot(word_parse, sintagma):
-    return (word_parse.tag.POS == "NOUN" and sintagma == "ROOT") or (
-        word_parse.tag.POS == "NOUN"
-        and word_parse.tag.animacy == "anim"
-        and word_parse.tag.case == "nomn"
-    )
+    return (word_parse.tag.POS == "NOUN" and sintagma == "ROOT") or \
+        (word_parse.tag.POS == "NOUN" and word_parse.tag.animacy == "anim" and word_parse.tag.case == "nomn")
 
 
 # verb + infinitive construction
 def verb_inf(word_parse, sintagma_next):
     return (
-        word_parse.tag.POS == "VERB"
-        and word_parse.tag.person == "1per"
-        and word_parse.tag.number == "sing"
+        word_parse.tag.POS == "VERB" and word_parse.tag.person == "1per" and word_parse.tag.number == "sing"
     ) and sintagma_next == "xcomp"
 
 
 # verb + object construction
 def verb_obj(word_parse, sintagma_next):
     return (
-        word_parse.tag.POS == "VERB"
-        and word_parse.tag.person == "1per"
-        and word_parse.tag.number == "sing"
+        word_parse.tag.POS == "VERB" and word_parse.tag.person == "1per" and word_parse.tag.number == "sing"
     ) and sintagma_next == "obj"
 
 
 # npro + descriptive units
 def npro_descr(word_parse, word_parse2):
     return (
-        word_parse.tag.POS == "NPRO"
-        and word_parse.tag.person == "1per"
-        and word_parse.tag.number == "sing"
+        word_parse.tag.POS == "NPRO" and word_parse.tag.person == "1per" and word_parse.tag.number == "sing"
     ) and word_parse2.tag.POS in ["NOUN", "ADJF", "PRTF", "PRTS"]
 
 
 # verb construction
 def verb_constr(word_parse, word_parse2):
     return (
-        word_parse.tag.POS == "VERB"
-        and word_parse.tag.person == "1per"
-        and word_parse.tag.number == "sing"
+        word_parse.tag.POS == "VERB" and word_parse.tag.person == "1per" and word_parse.tag.number == "sing"
     ) and word_parse2.tag.POS not in ["PREP", "CONJ", "ADVB"]
 
 
