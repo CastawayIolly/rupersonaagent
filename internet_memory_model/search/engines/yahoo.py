@@ -1,5 +1,5 @@
 """@desc
-		Parser for Yahoo search results
+        Parser for Yahoo search results
 """
 import re
 

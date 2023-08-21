@@ -13,74 +13,74 @@ def add_cmdline_args():
     parser = ArgumentParser()
 
     parser.add_argument(
-        '--save_name',  
-        type=str,  
-        default='rubert-base-retriever', 
+        '--save_name',
+        type=str,
+        default='rubert-base-retriever',
         help='Save path'
     )
     parser.add_argument(
-        '--model_dir',  
-        type=str, 
+        '--model_dir',
+        type=str,
         default='../pretrained_models',
         help='Path where the model is placed'
     )
     parser.add_argument(
-        "--model_name", 
-        type=str, 
+        "--model_name",
+        type=str,
         default='rubert-base',
         help='Model name. Can be the model name from Huggingface Hub'
     )
     parser.add_argument(
-        '--batch_size',  
-        type=int,   
+        '--batch_size',
+        type=int,
         default=6,
         help='Batch size used during training'
     )
     parser.add_argument(
-        '--num_workers', 
-        type=int,   
+        '--num_workers',
+        type=int,
         default=8,
         help='Number of workers in dataloaders'
     )
     parser.add_argument(
-        '--num_epochs',         
-        type=int,   
+        '--num_epochs',
+        type=int,
         default=3,
         help='Total number of epochs during trinaing'
     )
     parser.add_argument(
-        '--accumulation_steps', 
-        type=int,   
+        '--accumulation_steps',
+        type=int,
         default=8,
         help='Number of accumulation steps during training'
     )
     parser.add_argument(
-        "--context_max_length", 
-        type=int, 
+        "--context_max_length",
+        type=int,
         default=32,
         help='Maximum length of context in tokens'
     )
     parser.add_argument(
-        "--passage_max_length", 
-        type=int, 
+        "--passage_max_length",
+        type=int,
         default=32,
         help='Maximum length of each candidate in tokens'
     )
     parser.add_argument(
-        "--lr",               
-        type=float, 
+        "--lr",
+        type=float,
         default=5e-5,
         help='Learning rate'
     )
     parser.add_argument(
-        "--weight_decay",     
-        type=float, 
+        "--weight_decay",
+        type=float,
         default=1e-4,
         help=''
     )
     parser.add_argument(
-        "--num_warmup_steps", 
-        type=int,   
+        "--num_warmup_steps",
+        type=int,
         default=100,
         help=''
     )
@@ -90,12 +90,12 @@ def add_cmdline_args():
 
 def main(args):
     torch.set_float32_matmul_precision('high')
-    data_dir    = os.path.join(os.curdir, 'data')
+    data_dir = os.path.join(os.curdir, 'data')
     sbquad_path = 'sberquad'
     miracl_path = 'miracl'
     wizint_path = '../internet_model/data/wizint_rus'
 
-    save_dir  = os.path.join(os.curdir, 'models')
+    save_dir = os.path.join(os.curdir, 'models')
     save_path = os.path.join(save_dir, args.save_name)
 
     train_sbquad = dataset.InternetDataset(
@@ -108,9 +108,7 @@ def main(args):
     valid_miracl = dataset.InternetDataset(
         os.path.join(data_dir, miracl_path, 'valid.jsonl'))
 
-    train_wizint = dataset.InternetDataset(
-        os.path.join(wizint_path, 'train_f.jsonl'),
-        wizint_data=True)
+    train_wizint = dataset.InternetDataset(os.path.join(wizint_path, 'train_f.jsonl'), wizint_data=True)
     """valid_wizint = dataset.InternetDataset(
         os.path.join(wizint_path, 'valid.jsonl'),
         wizint_data=True)"""
@@ -134,34 +132,30 @@ def main(args):
     )
 
     train_loader = torch.utils.data.DataLoader(
-        train, 
-        batch_size=args.batch_size, 
-        shuffle=True, 
+        train,
+        batch_size=args.batch_size,
+        shuffle=True,
         num_workers=args.num_workers,
-        collate_fn=lambda data=train, tokenizer=model.tokenizer, \
-            context_max_length=args.context_max_length, \
-            passage_max_length=args.passage_max_length: \
+        collate_fn=lambda data=train, tokenizer=model.tokenizer,
+            context_max_length=args.context_max_length,
+            passage_max_length=args.passage_max_length:
                 dataset.collate_fn(
-                    data, 
-                    tokenizer, 
-                    context_max_length, 
+                    data,
+                    tokenizer,
+                    context_max_length,
                     passage_max_length
-                    ))
+                )
+    )
 
     valid_loader = torch.utils.data.DataLoader(
-        valid, 
-        batch_size=args.batch_size, 
-        shuffle=False, 
+        valid,
+        batch_size=args.batch_size,
+        shuffle=False,
         num_workers=args.num_workers,
-        collate_fn=lambda data=valid, tokenizer=model.tokenizer, \
-            context_max_length=args.context_max_length, \
-            passage_max_length=args.passage_max_length: \
-                dataset.collate_fn(
-                    data, 
-                    tokenizer, 
-                    context_max_length, 
-                    passage_max_length
-                    ))
+        collate_fn=lambda data=valid, tokenizer=model.tokenizer,
+            context_max_length=args.context_max_length,
+            passage_max_length=args.passage_max_length: dataset.collate_fn(data, tokenizer, context_max_length, passage_max_length)
+    )
 
     version = f"Train Retriever {args.model_name}. \
         Context length={args.context_max_length}. \
@@ -182,6 +176,7 @@ def main(args):
 
     model.M.save_pretrained(save_path)
     model.tokenizer.save_pretrained(save_path)
+
 
 if __name__ == "__main__":
     args = add_cmdline_args()

@@ -1,7 +1,6 @@
 import os
 
 import nest_asyncio
-from search.engines.duckduckgo import Search as DuckDuckSearch
 from search.engines.yahoo import Search as YahooSearch
 from sklearn.metrics import f1_score
 import numpy as np
@@ -12,12 +11,12 @@ import urllib.parse
 
 
 def log_metrics(
-    pl_module, 
-    logs = None, 
-    log_dicts = None,
-    batch_size = 1
+    pl_module,
+    logs=None,
+    log_dicts=None,
+    batch_size=1
 ):
-    if logs != None:
+    if logs is not None:
         for log in logs:
             pl_module.log(
                 log['name'],
@@ -26,7 +25,7 @@ def log_metrics(
                 on_step=log['on_step'],
                 batch_size=batch_size
             )
-    if log_dicts != None:
+    if log_dicts is not None:
         for log in log_dicts:
             pl_module.log_dict(
                 log['value'],
@@ -35,12 +34,13 @@ def log_metrics(
                 batch_size=batch_size
             )
 
+
 def compute_metrics(pl_module, answer, labels, generation=False):
     """
     Method for computing BLEU-1/2 and F1 metrics
     """
     y_pred = [
-        pl_module.tokenizer.decode(i, skip_special_tokens=False) if not generation else \
+        pl_module.tokenizer.decode(i, skip_special_tokens=False) if not generation else
         pl_module.tokenizer.decode(i[1:], skip_special_tokens=False)
         for i in answer
     ]
@@ -79,7 +79,7 @@ def compute_metrics(pl_module, answer, labels, generation=False):
         y_true = np.concatenate((y_true, [pl_module.tokenizer.pad_token_id for _ in range(max_len - y_true.shape[0])]))
     f1 = f1_score(y_true, y_pred, average='macro')
 
-    return metrics, f1 
+    return metrics, f1
 
 
 def print_trainable_parameters(model):
@@ -108,12 +108,12 @@ class SearchModule():
 
         nest_asyncio.apply()
 
-        yahoo      = YahooSearch()
-        duckduckgo = DuckDuckSearch()
+        yahoo = YahooSearch()
+        # duckduckgo = DuckDuckSearch()
 
         self.search_engines = [
-            yahoo, 
-            #duckduckgo
+            yahoo,
+            # duckduckgo
         ]
 
         self.languages = languages
@@ -124,9 +124,9 @@ class SearchModule():
             search_args = (query, i)
 
             docs.extend(self.get_one_page_results(search_args))
-        
+
         return docs
-    
+
     def get_one_page_results(self, search_args):
         docs = []
         for i, engine in enumerate(self.search_engines):
@@ -136,10 +136,10 @@ class SearchModule():
             except Exception as e:
                 print(f"{e}\nSkipping {engine}")
 
-            if results != None:
+            if results is not None:
                 links = [i['links'] for i in results]
 
-            if i == 1: 
+            if i == 1:
                 # Preprocess link if it's from DuckDuckGo
                 for j in links:
                     print(j)
@@ -150,10 +150,10 @@ class SearchModule():
                     docs.extend(self.text_from_html(link))
             else:
                 docs.extend(reduce(
-                    lambda x,y: x+y,
+                    lambda x, y: x + y,
                     [self.text_from_html(j) for j in links]
                 ))
-        
+
         return docs
 
     def text_from_html(self, link):
@@ -161,7 +161,7 @@ class SearchModule():
             body = requests.get(link, timeout=5)
         except Exception:
             return []
-        
+
         if body.status_code == 200:
             ans = []
             soup = BeautifulSoup(body.text, 'html.parser')

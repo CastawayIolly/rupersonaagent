@@ -26,10 +26,9 @@ def get_rand_user_agent():
     user_agent = random.choice(USER_AGENT_LIST)
     try:
         user_agent = UserAgent().random
-    except:
-       pass
+    except Exception:
+        pass
     return user_agent
-    
 
 
 class CacheHandler:
@@ -46,7 +45,7 @@ class CacheHandler:
                 os.makedirs(cache)
 
     async def get_source(self, engine, url, headers, cache=True,
-                        proxy=None, proxy_auth=None):
+                         proxy=None, proxy_auth=None):
         """
         Retrieves source code of webpage from internet or from cache
 
@@ -71,10 +70,10 @@ class CacheHandler:
         if os.path.exists(cache_path) and cache:
             with open(cache_path, 'rb') as stream:
                 return pickle.load(stream), True
-        get_vars = { 'url':url, 'headers':headers}
+        get_vars = {'url': url, 'headers': headers}
         if proxy and proxy_auth:
             auth = aiohttp.BasicAuth(*proxy_auth)
-            get_vars.update({'proxy':proxy, 'proxy_auth': auth})
+            get_vars.update({'proxy': proxy, 'proxy_auth': auth})
 
         async with aiohttp.ClientSession(trust_env=True, read_bufsize=256) as session:
             async with session.get(**get_vars) as resp:

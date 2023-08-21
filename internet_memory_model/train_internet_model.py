@@ -7,90 +7,89 @@ import torch
 import torch.utils.data
 from in_model import InternetModel
 from pytorch_lightning import loggers as pl_loggers
-from tqdm.auto import tqdm
 
 
 def add_cmdline_args():
     parser = ArgumentParser()
 
     parser.add_argument(
-        '--save_name',  
-        type=str,  
-        default='f-t5-big-internet', 
+        '--save_name',
+        type=str,
+        default='f-t5-big-internet',
         help='Save path where LoRA Adapter will be placed'
     )
     parser.add_argument(
-        "--model_name",   
-        type=str,  
+        "--model_name",
+        type=str,
         default='f-t5-big',
         help='Model name. Can be a name from Huggingface Hub'
     )
     parser.add_argument(
-        "--model_dir",    
-        type=str, 
+        "--model_dir",
+        type=str,
         default='pretrained_models',
         help='Path to folder with pretrained model'
     )
     parser.add_argument(
-        "--context_max_length", 
-        type=int, 
+        "--context_max_length",
+        type=int,
         default=400,
         help='Maximum length of context in search and response tasks'
     )
     parser.add_argument(
-        "--passage_max_length", 
-        type=int, 
+        "--passage_max_length",
+        type=int,
         default=60,
         help='Maximum length of passages in knowledge task'
     )
     parser.add_argument(
-        "--labels_max_length",  
-        type=int, 
+        "--labels_max_length",
+        type=int,
         default=60,
         help='Maximum length of labels in tokens'
     )
     parser.add_argument(
-        "--passage_count",      
-        type=int, 
+        "--passage_count",
+        type=int,
         default=8,
         help="Number of passages per 1 context sample in knowledge task"
-        )
+    )
     parser.add_argument(
-        '--batch_size',  
-        type=int,   
+        '--batch_size',
+        type=int,
         default=20,
         help='Number of samples per batch used during training'
     )
     parser.add_argument(
-        '--num_workers', 
-        type=int,   
+        '--num_workers',
+        type=int,
         default=8,
         help='Number of workers for DataLoader'
     )
     parser.add_argument(
-        '--num_epochs',         
-        type=int,   
+        '--num_epochs',
+        type=int,
         default=2,
         help='Number of epochs in training process'
     )
     parser.add_argument(
-        '--accumulation_steps', 
-        type=int,   
+        '--accumulation_steps',
+        type=int,
         default=4,
     )
     parser.add_argument(
-        "--lr",               
-        type=float, 
+        "--lr",
+        type=float,
         default=1e-4
     )
     parser.add_argument(
-        "--weight_decay",     
-        type=float, 
+        "--weight_decay",
+        type=float,
         default=1e-4
     )
     parser.add_argument(
-        "--num_warmup_steps", 
-        type=int,   
+        "--num_warmup_steps",
+        type=int,
         default=25
     )
 
@@ -98,17 +97,17 @@ def add_cmdline_args():
 
 
 def main(args):
-    data_dir      = os.path.join(os.curdir, 'data')
-    toloka_path   = 'toloka'
-    ruswiz_path   = 'wizint_rus'
+    data_dir = os.path.join(os.curdir, 'data')
+    toloka_path = 'toloka'
+    ruswiz_path = 'wizint_rus'
     sberquad_path = 'sberquad'
 
-    save_dir  = os.path.join(os.curdir, 'models')
+    save_dir = os.path.join(os.curdir, 'models')
     save_path = os.path.join(save_dir, args.save_name)
 
-    search    = "search"
+    search = "search"
     knowledge = "knowledge"
-    response  = "response"
+    response = "response"
 
     train_sbquad = in_dataset.InternetDataset(
         os.path.join(data_dir, sberquad_path, 'train.jsonl'),
@@ -161,17 +160,17 @@ def main(args):
     args.tokenizer = model.tokenizer
 
     train_loader = torch.utils.data.DataLoader(
-        train, 
-        batch_size=args.batch_size, 
+        train,
+        batch_size=args.batch_size,
         shuffle=False,
         batch_sampler=in_dataset.BatchSampler(train, args.batch_size),
         num_workers=args.num_workers,
         collate_fn=lambda data=train, args=args: in_dataset.collate_fn(data, args))
 
     valid_loader = torch.utils.data.DataLoader(
-        valid, 
-        batch_size=1, 
-        shuffle=False, 
+        valid,
+        batch_size=1,
+        shuffle=False,
         num_workers=args.num_workers,
         collate_fn=lambda data=valid, args=args: in_dataset.collate_fn(data, args))
 
@@ -195,7 +194,7 @@ def main(args):
     )
 
     trainer.fit(
-        model, 
+        model,
         train_dataloaders=train_loader,
         val_dataloaders=valid_loader)
 
@@ -203,6 +202,7 @@ def main(args):
 
     model.M.save_pretrained(save_path)
     model.tokenizer.save_pretrained(save_path)
+
 
 if __name__ == "__main__":
     args = add_cmdline_args()

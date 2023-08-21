@@ -3,6 +3,7 @@ from transformers import T5ForConditionalGeneration
 from transformers.modeling_outputs import Seq2SeqLMOutput
 import torch
 
+
 class FiDT5(T5ForConditionalGeneration):
     """
     Modification of T5 model that can use Fusion-in-Decoder method
@@ -14,28 +15,28 @@ class FiDT5(T5ForConditionalGeneration):
 
     def make_fid_encoder(self):
         self.encoder = FiDEncoder(self.encoder)
-    
+
     def make_base_encoder(self):
         self.encoder = self.encoder.encoder
 
     def forward(
         self,
-        input_ids = None,
-        attention_mask = None,
-        decoder_input_ids = None,
-        encoder_outputs = None,
-        labels = None,
-        use_cache = None,
-        decoder_attention_mask = None,
-        head_mask = None,
-        decoder_head_mask = None,
-        cross_attn_head_mask = None,
-        past_key_values = None,
-        inputs_embeds = None,
-        decoder_inputs_embeds = None,
-        output_attentions = None,
-        output_hidden_states = None,
-        return_dict = None,
+        input_ids=None,
+        attention_mask=None,
+        decoder_input_ids=None,
+        encoder_outputs=None,
+        labels=None,
+        use_cache=None,
+        decoder_attention_mask=None,
+        head_mask=None,
+        decoder_head_mask=None,
+        cross_attn_head_mask=None,
+        past_key_values=None,
+        inputs_embeds=None,
+        decoder_inputs_embeds=None,
+        output_attentions=None,
+        output_hidden_states=None,
+        return_dict=None,
     ):
         # Encode if needed (training, first prediction pass)
         if encoder_outputs is None:
@@ -51,15 +52,15 @@ class FiDT5(T5ForConditionalGeneration):
 
             # Convert encoder inputs in embeddings if needed
             encoder_outputs = self.encoder(
-                input_ids=input_ids, 
+                input_ids=input_ids,
                 attention_mask=attention_mask
-                )
+            )
 
             # Change shape back to B * (N * L) if used FiD method
             if self.do_fid:
                 encoder_outputs.last_hidden_state = encoder_outputs.last_hidden_state.view(self.bsz, self.n_passages * self.passage_length, -1)
                 if attention_mask is not None:
-                    attention_mask  = attention_mask.view(self.bsz, self.n_passages * self.passage_length)
+                    attention_mask = attention_mask.view(self.bsz, self.n_passages * self.passage_length)
 
         hidden_states = encoder_outputs[0]
 
@@ -83,7 +84,7 @@ class FiDT5(T5ForConditionalGeneration):
             return_dict=return_dict,
         )
 
-        sequence_output  = decoder_outputs[0]
+        sequence_output = decoder_outputs[0]
 
         if self.config.tie_word_embeddings:
             sequence_output = sequence_output * (self.model_dim**-0.5)
@@ -119,14 +120,14 @@ class FiDEncoder(torch.nn.Module):
 
         self.config = self.encoder.config
         self.main_input_name = self.encoder.main_input_name
-    
+
     def forward(
         self,
         input_ids=None,
         attention_mask=None,
         encoder_outputs=None,
         **kwargs
-    ):  
+    ):
         # Encode if needed (training, first prediction pass)
         if encoder_outputs is None:
             # If we use Fusion-in-Decoder method
@@ -135,10 +136,10 @@ class FiDEncoder(torch.nn.Module):
             # N - Number of passages
             # L - Length of passages
             if self.do_fid:
-                input_ids      = input_ids.view(self.bsz * self.n_passages, -1)
+                input_ids = input_ids.view(self.bsz * self.n_passages, -1)
                 if attention_mask is not None:
                     attention_mask = attention_mask.view(self.bsz * self.n_passages, -1)
-            
+
             encoder_outputs = self.encoder(
                 input_ids=input_ids,
                 attention_mask=attention_mask
@@ -148,8 +149,8 @@ class FiDEncoder(torch.nn.Module):
             if self.do_fid:
                 encoder_outputs.last_hidden_state = encoder_outputs.last_hidden_state.view(self.bsz, self.n_passages * self.passage_length, -1)
                 if attention_mask is not None:
-                    attention_mask  = attention_mask.view(self.bsz, self.n_passages * self.passage_length)
-        
+                    attention_mask = attention_mask.view(self.bsz, self.n_passages * self.passage_length)
+
         return encoder_outputs
 
     def get_input_embeddings(self):

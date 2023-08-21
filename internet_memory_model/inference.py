@@ -12,44 +12,44 @@ def add_cmdline_args():
     parser = ArgumentParser()
 
     parser.add_argument(
-        '--save_name',  
-        type=str,  
-        default='f-t5-big-internet', 
+        '--save_name',
+        type=str,
+        default='f-t5-big-internet',
         help='Path where trained LoRA adapter should be placed'
     )
     parser.add_argument(
-        "--retriever_name", 
-        type=str, 
+        "--retriever_name",
+        type=str,
         default='rubert-base-retriever',
         help='Name of Retriever model'
     )
     parser.add_argument(
-        "--model_name",   
-        type=str,  
+        "--model_name",
+        type=str,
         default='f-t5-big',
         help='Model name. Can be a name from Huggingface Hub'
     )
     parser.add_argument(
-        "--model_dir",    
-        type=str,  
+        "--model_dir",
+        type=str,
         default='pretrained_models',
         help='Path to folder with pretrained model'
     )
     parser.add_argument(
-        "--passage_max_length", 
-        type=int, 
+        "--passage_max_length",
+        type=int,
         default=128,
         help='Maximum length of passages in knowledge task'
     )
     parser.add_argument(
-        "--labels_max_length",  
-        type=int, 
+        "--labels_max_length",
+        type=int,
         default=128,
         help='Maximum length of labels in tokens'
     )
     parser.add_argument(
-        "--passage_count",      
-        type=int, 
+        "--passage_count",
+        type=int,
         default=5,
         help="Number of passages per 1 context sample in knowledge task"
     )
@@ -58,9 +58,9 @@ def add_cmdline_args():
 
 
 def predict(
-    context, 
-    personas, 
-    model, 
+    context,
+    personas,
+    model,
     retriever,
     r_tokenizer,
     passage_max_length,
@@ -105,19 +105,19 @@ def get_response(
     Generate the final response
     """
     tokenizer = model.tokenizer
-    device    = model.M.device
+    device = model.M.device
     response_ids = tokenizer(
         "<LM>" + context + personas + knowledge + im.RESPONSE_TASK,
-        return_tensors = 'pt'
+        return_tensors='pt'
     ).input_ids.to(device)
 
     _, _, response = model.do_forward(
         "Inference response",
-        input_ids = response_ids, 
-        do_fid = False,
-        do_generation = True,
-        penalty_alpha = 0.6,
-        top_k = 4
+        input_ids=response_ids,
+        do_fid=False,
+        do_generation=True,
+        penalty_alpha=0.6,
+        top_k=4
     )
 
     return tokenizer.decode(response[0], skip_special_tokens=True)
@@ -132,7 +132,7 @@ def extract_knowledge(
     Extract knowledge
     """
     tokenizer = model.tokenizer
-    device    = model.M.device
+    device = model.M.device
 
     knowledge_passages[-1] += im.KNOWLEDGE_TASK
 
@@ -147,9 +147,9 @@ def extract_knowledge(
 
     _, _, knowledge = model.do_forward(
         "Inference knowledge",
-        input_ids = knowledge_ids, 
-        do_fid = True,
-        do_generation = True
+        input_ids=knowledge_ids,
+        do_fid=True,
+        do_generation=True
     )
     return tokenizer.decode(knowledge[0], skip_special_tokens=True)
 
@@ -167,32 +167,33 @@ def get_data_from_external_sources(
     Get data from the Internet and long-term memory.
     Retrieve the most relevant candidates from it.
     """
-    device        = retriever.device
+    device = retriever.device
     search_result = model.search_module.do_search(search_query)
 
     passage_ids = tokenizer(
         search_result,
-        max_length = passage_max_length,
+        max_length=passage_max_length,
         padding=True,
         truncation=True,
         return_tensors='pt'
     ).input_ids.to(device)
     context_ids = tokenizer(
         "<LM>" + context,
-        max_length = 2 * passage_max_length,
+        max_length=2 * passage_max_length,
         truncation=True,
         return_tensors='pt'
     ).input_ids.to(device)
 
     result = get_relevant_passages(
-        passage_ids, context_ids, 
+        passage_ids, context_ids,
         retriever, passage_count
     )
 
     return [
-        tokenizer.decode(i, skip_special_tokens=True) 
+        tokenizer.decode(i, skip_special_tokens=True)
         for i in result[0][0]
     ] + result[1]
+
 
 def get_search_query(
     model,
@@ -203,17 +204,17 @@ def get_search_query(
     Generate the search query
     """
     tokenizer = model.tokenizer
-    device    = model.M.device
+    device = model.M.device
 
     search_ids = tokenizer(
         "<LM>" + context + personas + im.SEARCH_TASK,
-        return_tensors = 'pt'
+        return_tensors='pt'
     ).input_ids.to(device)
 
     _, _, search_query = model.do_forward(
         "Inference search",
-        input_ids = search_ids,
-        do_generation = True
+        input_ids=search_ids,
+        do_generation=True
     )
 
     return tokenizer.decode(search_query[0], skip_special_tokens=True)
@@ -241,9 +242,9 @@ def get_relevant_passages(
         if p_pred is None:
             p_pred = ans
         else:
-            p_pred = torch.cat((p_pred, ans))            
+            p_pred = torch.cat((p_pred, ans))
 
-    similarity    = torch.mm(q_pred, p_pred.transpose(0, 1))
+    similarity = torch.mm(q_pred, p_pred.transpose(0, 1))
     softmax_score = torch.nn.functional.log_softmax(similarity, dim=-1)
 
     score, idx = torch.topk(softmax_score, min(passage_ids.shape[0], top_N))
@@ -263,6 +264,7 @@ def get_relevant_passages(
 
     return passage_ids[idx], texts
 
+
 def load_from_memory(retriever):
     """
     Load data from memory source
@@ -272,13 +274,14 @@ def load_from_memory(retriever):
         retriever.without_memory = True
     else:
         retriever.without_memory = False
-        data             = Dataset.from_csv("retriever/data/memory/embeddings.csv")
+        data = Dataset.from_csv("retriever/data/memory/embeddings.csv")
         retriever.memory = torch.from_numpy(data.to_pandas().to_numpy()).to(torch.float)
         retriever.memory = retriever.memory.to(retriever.device)
 
-        retriever.texts  = Dataset.from_csv("retriever/data/memory/texts.csv")['0']
+        retriever.texts = Dataset.from_csv("retriever/data/memory/texts.csv")['0']
 
-def main(args):  
+
+def main(args):
     model = im.InternetModel(
         args.model_dir,
         args.model_name,
@@ -289,12 +292,11 @@ def main(args):
     model.M.make_fid_encoder()
     model.M.eval()
 
-    retriever   = AutoModel.from_pretrained(os.path.join("retriever/models", args.retriever_name))
+    retriever = AutoModel.from_pretrained(os.path.join("retriever/models", args.retriever_name))
     r_tokenizer = AutoTokenizer.from_pretrained(os.path.join("retriever/models", args.retriever_name))
     retriever.eval()
 
-    device = model.M.device
-    #retriever.to(device)
+    # retriever.to(device)
 
     load_from_memory(retriever)
 
@@ -304,10 +306,10 @@ def main(args):
 
     print("Your persona:")
     [print("    " + i) for i in persona1]
-    print("_"*15)
+    print("_" * 15)
     print("Bot persona:")
     [print("    " + i) for i in persona2]
-    print("_"*15)
+    print("_" * 15)
 
     personas = im.PERSONA1 + im.PERSONA1.join(persona1) + im.PERSONA2 + im.PERSONA2.join(persona2)
 
@@ -330,7 +332,7 @@ def main(args):
         user_in = input("User: ")
 
 
-if __name__ == "__main__":    
+if __name__ == "__main__":
     args = add_cmdline_args()
 
     main(args)

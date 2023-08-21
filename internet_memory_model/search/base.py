@@ -1,5 +1,5 @@
 """@desc
-		Base class inherited by every search engine
+        Base class inherited by every search engine
 """
 
 import asyncio
@@ -70,11 +70,11 @@ class SearchResult():
         """ Allow getting by index and by type ('descriptions', 'links'...)"""
         if isinstance(value, int):
             return self.results[value]
-        l = []
+        links = []
         for x in self.results:
             with suppress(KeyError):
-                l.append(x[value])
-        return l
+                links.append(x[value])
+        return links
 
     def keys(self):
         keys = {}
@@ -186,7 +186,6 @@ class BaseSearch:
         :type proxy_auth: (str, str)
         :return: html source code of a given URL.
         """
-        #print(url)
         try:
             html, cache_hit = await self.cache_handler.get_source(self.name, url, self.headers(), cache, proxy, proxy_auth)
         except Exception as exc:
@@ -250,12 +249,12 @@ class BaseSearch:
         try:
             search_results = self.parse_result(results, **kwargs)
         # AttributeError occurs as it cannot pass the returned soup
-        except AttributeError as e:
+        except AttributeError:
             raise NoResultsOrTrafficError(
                 "The returned results could not be parsed. This might be due to site updates or "
                 "server errors. Drop an issue at https://github.com/bisoncorps/search-engine-parser"
                 " if this persists"
-                )
+            )
 
         return search_results
 
@@ -278,12 +277,12 @@ class BaseSearch:
             page = 1
         # Get search Page Results
         loop = asyncio.get_event_loop()
-        url = self.get_search_url(
-                    query, page, **kwargs)
+        url = self.get_search_url(query, page, **kwargs)
         soup = loop.run_until_complete(
-            self.get_soup(url, cache=cache,
-                         proxy=proxy,
-                         proxy_auth=proxy_auth))
+            self.get_soup(url,
+                          cache=cache,
+                          proxy=proxy,
+                          proxy_auth=proxy_auth))
         return self.get_results(soup, **kwargs)
 
     async def async_search(self, query=None, page=1, cache=True, proxy=None, proxy_auth=None, **kwargs):

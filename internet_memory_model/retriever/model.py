@@ -7,21 +7,21 @@ from transformers import (BertModel, AutoTokenizer,
                           get_cosine_schedule_with_warmup)
 
 
-PERSONA1         = '<Персона пользователя 1>'
-PERSONA2         = '<Персона пользователя 2>'
-SEARCH_TASK      = '<Выполнить поиск>'
-KNOWLEDGE_TASK   = '<Извлечь знания>'
-RESPONSE_TASK    = '<Сгенерировать реплику>'
-NO_QUERY         = '<Нет запроса>'
-NO_KNOWLEDGE     = '<Нет знаний>'
-KNOWLEDGE        = '<Знания>'
-USER1_REPLY      = '<Реплика пользователя 1>'
-USER2_REPLY      = '<Реплика пользователя 2>'
+PERSONA1 = '<Персона пользователя 1>'
+PERSONA2 = '<Персона пользователя 2>'
+SEARCH_TASK = '<Выполнить поиск>'
+KNOWLEDGE_TASK = '<Извлечь знания>'
+RESPONSE_TASK = '<Сгенерировать реплику>'
+NO_QUERY = '<Нет запроса>'
+NO_KNOWLEDGE = '<Нет знаний>'
+KNOWLEDGE = '<Знания>'
+USER1_REPLY = '<Реплика пользователя 1>'
+USER2_REPLY = '<Реплика пользователя 2>'
 KNOWLEDGE_RESULT = '<Итоговые знания>'
-SEARCH_RESULT    = '<Итоговый поиск>'
-RESPONSE_RESULT  = '<Итоговая реплика>'
-QUESTION         = '<Вопрос>'
-CANDIDATE        = '<Кандидат>'
+SEARCH_RESULT = '<Итоговый поиск>'
+RESPONSE_RESULT = '<Итоговая реплика>'
+QUESTION = '<Вопрос>'
+CANDIDATE = '<Кандидат>'
 
 ATTR_TO_SPECIAL_TOKEN = {
     'additional_special_tokens': [
@@ -44,10 +44,10 @@ class Retriever(pl.LightningModule):
 
         model_path = os.path.join(model_dir, model_name)
 
-        if os.path.exists(model_path): # Load from local path
+        if os.path.exists(model_path):  # Load from local path
             self.M = BertModel.from_pretrained(model_path)
             self.tokenizer = AutoTokenizer.from_pretrained(model_path)
-        else: # Load from Huggingface Hub
+        else:  # Load from Huggingface Hub
             self.M = BertModel.from_pretrained(model_name)
             self.tokenizer = AutoTokenizer.from_pretrained(model_path)
 
@@ -56,8 +56,8 @@ class Retriever(pl.LightningModule):
 
         self.metrics = torchmetrics.MetricCollection(
             {
-                'Top@1':  TopKAccuracy(topk=1),
-                'Top@5':  TopKAccuracy(topk=5),
+                'Top@1': TopKAccuracy(topk=1),
+                'Top@5': TopKAccuracy(topk=5),
                 'Top@20': TopKAccuracy(topk=20),
                 'Top@30': TopKAccuracy(topk=30),
             }
@@ -76,9 +76,9 @@ class Retriever(pl.LightningModule):
         context_max_length,
         passage_max_length
     ):
-        self.lr                 = lr
-        self.weight_decay       = weight_decay
-        self.num_warmup_steps   = num_warmup_steps
+        self.lr = lr
+        self.weight_decay = weight_decay
+        self.num_warmup_steps = num_warmup_steps
         self.num_training_steps = num_training_steps
         self.context_max_length = context_max_length
         self.passage_max_length = passage_max_length
@@ -99,18 +99,18 @@ class Retriever(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         q_ids, q_mask = batch[0], batch[1]
         p_ids, p_mask = batch[2], batch[3]
-        labels        = batch[4]
+        labels = batch[4]
 
         q_pred = self.M(
-            input_ids=q_ids, 
+            input_ids=q_ids,
             attention_mask=q_mask
         ).last_hidden_state[:, 0]
 
         p_pred = self.M(
-            input_ids=p_ids, 
+            input_ids=p_ids,
             attention_mask=p_mask
         ).last_hidden_state[:, 0]
-        
+
         similarity = self.dot(q_pred, p_pred)
         softmax_score = torch.nn.functional.log_softmax(similarity, dim=-1)
 
@@ -139,18 +139,18 @@ class Retriever(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         q_ids, q_mask = batch[0], batch[1]
         p_ids, p_mask = batch[2], batch[3]
-        labels        = batch[4]
+        labels = batch[4]
 
         q_pred = self.M(
-            input_ids=q_ids, 
+            input_ids=q_ids,
             attention_mask=q_mask
         ).last_hidden_state[:, 0]
 
         p_pred = self.M(
-            input_ids=p_ids, 
+            input_ids=p_ids,
             attention_mask=p_mask
         ).last_hidden_state[:, 0]
-        
+
         similarity = self.dot(q_pred, p_pred)
         softmax_score = torch.nn.functional.log_softmax(similarity, dim=-1)
 
@@ -171,6 +171,7 @@ class Retriever(pl.LightningModule):
 
         return loss
 
+
 class TopKAccuracy(torchmetrics.Metric):
     def __init__(self, topk=1):
         super().__init__()
@@ -188,7 +189,7 @@ class TopKAccuracy(torchmetrics.Metric):
         else:
             self.correct += target.sum()
 
-        self.total   += target.sum()
+        self.total += target.sum()
 
     def compute(self):
         return self.correct.float() / self.total

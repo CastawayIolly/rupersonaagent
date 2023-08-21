@@ -11,61 +11,61 @@ from tqdm.auto import tqdm
 
 class InternetDataset(torch.utils.data.Dataset):
     def __init__(
-        self, 
-        path, 
-        is_toloka, 
-        skip_tasks, 
-        passage_count, 
+        self,
+        path,
+        is_toloka,
+        skip_tasks,
+        passage_count,
         short_replies_len=1,
         batch_size=1
     ):
         super().__init__()
         self.data = get_data(
-            path, 
-            is_toloka, 
-            skip_tasks, 
-            passage_count, 
+            path,
+            is_toloka,
+            skip_tasks,
+            passage_count,
             short_replies_len,
             batch_size
         )
-        
+
     def __len__(self):
         return len(self.data)
-    
+
     def __getitem__(self, idx):
         return self.data[idx]
 
 
 def get_data(
-    path, 
-    is_toloka=True, 
+    path,
+    is_toloka=True,
     skip_tasks=[],
     passage_count=1,
     short_replies_len=1,
     batch_size=1
 ):
     if is_toloka:
-        persona1      = 'persona1'
-        persona2      = 'persona2'
-        user1_action  = 'user1'
-        user2_action  = 'user2'
+        persona1 = 'persona1'
+        persona2 = 'persona2'
+        user1_action = 'user1'
+        user2_action = 'user2'
         search_action = None
         engine_action = None
     else:
-        persona1      = 'apprentice_persona'
-        persona2      = None
-        user1_action  = 'Apprentice => Wizard'
-        user2_action  = 'Wizard => Apprentice'
+        persona1 = 'apprentice_persona'
+        persona2 = None
+        user1_action = 'Apprentice => Wizard'
+        user2_action = 'Wizard => Apprentice'
         search_action = 'Wizard => SearchAgent'
         engine_action = 'SearchAgent => Wizard'
 
     keys = {
         'persona1': persona1,
         'persona2': persona2,
-        'user1':    user1_action,
-        'user2':    user2_action,
-        'search':   search_action,
-        'engine':   engine_action
+        'user1': user1_action,
+        'user2': user2_action,
+        'search': search_action,
+        'engine': engine_action
     }
 
     result = []
@@ -82,7 +82,7 @@ def get_data(
             data = list(data.values())[0]
 
             result.extend(parse_data(data, keys, passage_count, short_replies_len))
-    
+
     random.shuffle(result)
     result = result[:len(result) // batch_size * batch_size]
 
@@ -99,44 +99,43 @@ def get_data(
             result[i]['response_labels'] = None
 
     print(f"Num examples: {len(result)}")
-    
+
     return result
-    
+
 
 def parse_data(
-    data, 
-    keys, 
-    passage_count, 
+    data,
+    keys,
+    passage_count,
     short_replies_len=1
 ):
     dialog = data['dialog_history']
 
-    context            = []
+    context = []
 
-    search_labels      = []
+    search_labels = []
 
     knowledge_passages = []
-    knowledge          = []
+    knowledge = []
 
-    personas           = []
-    response_labels    = []
+    response_labels = []
 
     actions_stack = []
-    prev_action   = '-1'
-    prev_context  = []
+    prev_action = '-1'
+    prev_context = []
     for idx, elem in enumerate(dialog):
         if not (elem['action'] == keys['user1'] and prev_action == keys['user2']):
             actions_stack.append(elem)
             prev_action = elem['action']
             if idx < len(dialog) - 1:
                 continue
-        
+
         if keys['user2'] not in [i['action'] for i in actions_stack]:
             continue
 
         prev_action = elem['action']
-        
-        #Get search label
+
+# Get search label
         do_search = False
         for i in reversed(range(len(actions_stack))):
             if actions_stack[i]['action'] == keys['search']:
@@ -147,11 +146,11 @@ def parse_data(
         if not do_search:
             search_labels.append(im.NO_QUERY)
 
-        #Get context and response label
-        to_add       = True
-        response     = ''
-        prev_token   = ''
-        count        = 0
+        # Get context and response label
+        to_add = True
+        response = ''
+        prev_token = ''
+        count = 0
         context_list = []
         for i in reversed(actions_stack):
             if to_add and i['action'] != keys['user2']:
@@ -166,37 +165,37 @@ def parse_data(
 
             if not to_add and i['action'] in [keys['user1'], keys['user2']]:
                 token = im.USER1_REPLY if i['action'] == keys['user1'] else im.USER2_REPLY
-                # In case when user sends 2+ replies 
+                # In case when user sends 2+ replies
                 # add special token only before first reply
                 token = token * (token != prev_token)
 
                 context_list = [[token, i['text']]] + context_list
-        
+
         if to_add:
             response = im.USER2_REPLY + response[1:]
             context_list[0][0] = im.USER2_REPLY
-        
+
         # Last user's replies not included in context
         # They are in response
         prev_context.extend(context_list)
         context.append(prev_context[:-count])
         response_labels.append(response)
 
-        #Get knowledge passages and labels
+        # Get knowledge passages and labels
         possible_knowledge = actions_stack[-1]['context']['contents']
         if possible_knowledge != []:
-            passages           = reduce(
-                lambda x,y: x+y,
+            passages = reduce(
+                lambda x, y: x + y,
                 [possible_knowledge[i]['content'] for i in range(len(possible_knowledge))]
             )
         else:
             passages = []
 
         try:
-            knowledge_line     = reduce(
-                lambda x,y :x+y, 
+            knowledge_line = reduce(
+                lambda x, y: x + y,
                 actions_stack[-1]['context']['selected_contents']
-                )[1:]
+            )[1:]
         except KeyError:
             [print(f"{i['action']}: {i['text']}") for i in actions_stack]
             [print(f"{i['action']}: {i['text']}") for i in dialog]
@@ -206,21 +205,21 @@ def parse_data(
                 break
             if actions_stack[i]['action'] == keys['user2']:
                 current_knowledge = reduce(
-                    lambda x,y :x+y, 
+                    lambda x, y: x + y,
                     actions_stack[i]['context']['selected_contents']
-                    )[1:]
+                )[1:]
 
                 for j in range(len(current_knowledge)):
                     knowledge_line[j] = knowledge_line[j] or current_knowledge[j]
-        
+
         random.shuffle(passages)
         passages, knowledge_line = reduce_passages_count(passages, knowledge_line, passage_count)
 
         if len(passages) > 0:
             total_knowledge = reduce(
-                lambda x,y: x+y,
+                lambda x, y: x + y,
                 [(im.KNOWLEDGE + passages[i]) * knowledge_line[i] for i in range(len(passages))]
-                )
+            )
             if total_knowledge == '':
                 total_knowledge = im.NO_KNOWLEDGE
         else:
@@ -228,7 +227,7 @@ def parse_data(
 
         random.shuffle(passages)
         knowledge_passages.append(passages)
-        
+
         knowledge.append(total_knowledge)
 
         if len(response_labels[-1].split(" ")) < short_replies_len:
@@ -240,12 +239,12 @@ def parse_data(
 
         actions_stack = [elem]
 
-    #Get personas
+    # Get personas
     if keys['persona1'] in data:
         persona1 = im.PERSONA1 + data[keys['persona1']]
     else:
         persona1 = ''
-    if keys['persona2'] != None and keys['persona2'] in data:
+    if keys['persona2'] is not None and keys['persona2'] in data:
         persona2 = im.PERSONA2 + data[keys['persona2']]
     else:
         persona2 = ''
@@ -256,19 +255,20 @@ def parse_data(
 
     return [
         {
-            'context':            context[i],
-            'search_labels':      search_labels[i],
+            'context': context[i],
+            'search_labels': search_labels[i],
             'knowledge_passages': knowledge_passages[i],
-            'knowledge':          knowledge[i],
-            'personas':           personas[i],
-            'response_labels':    response_labels[i]
+            'knowledge': knowledge[i],
+            'personas': personas[i],
+            'response_labels': response_labels[i]
         }
-    for i in range(len(context))]
+        for i in range(len(context))]
+
 
 def reduce_passages_count(passages, is_used, count):
     result_passages = []
-    result_used     = []
-    total_count     = 0
+    result_used = []
+    total_count = 0
     for i in range(len(passages)):
         if total_count >= count:
             break
@@ -287,12 +287,12 @@ def reduce_passages_count(passages, is_used, count):
 
 
 def collate_fn(data, args):
-    context            = []
-    search_labels      = []
+    context = []
+    search_labels = []
     knowledge_passages = []
-    knowledge          = []
-    personas           = []
-    response_labels    = []
+    knowledge = []
+    personas = []
+    response_labels = []
     for i in data:
         context.append(i['context'])
         search_labels.append(i['search_labels'])
@@ -303,23 +303,23 @@ def collate_fn(data, args):
 
     last_reply = ""
 
-    if search_labels[0] == None:
-        search_ids    = None
-        search_mask   = None
+    if search_labels[0] is None:
+        search_ids = None
+        search_mask = None
         search_labels = None
     else:
         search_ids, search_mask, search_labels = get_search_data(
-            args.tokenizer, 
+            args.tokenizer,
             args.context_max_length,
             args.labels_max_length,
             context,
             personas,
             search_labels
-            )
+        )
 
-    if knowledge[0] == None:
-        knowledge_ids    = None
-        knowledge_mask   = None
+    if knowledge[0] is None:
+        knowledge_ids = None
+        knowledge_mask = None
         knowledge_labels = None
     else:
         knowledge_ids, knowledge_mask, knowledge_labels = get_knowledge_data(
@@ -332,9 +332,9 @@ def collate_fn(data, args):
             knowledge
         )
 
-    if response_labels[0] == None:
-        response_ids    = None
-        response_mask   = None
+    if response_labels[0] is None:
+        response_ids = None
+        response_mask = None
         response_labels = None
     else:
         response_ids, response_mask, response_labels = get_response_data(
@@ -348,38 +348,39 @@ def collate_fn(data, args):
         )
 
     return (
-        search_ids,    search_mask,    search_labels,
+        search_ids, search_mask, search_labels,
         knowledge_ids, knowledge_mask, knowledge_labels,
-        response_ids,  response_mask,  response_labels, last_reply
+        response_ids, response_mask, response_labels, last_reply
     )
 
-    
+
 def get_search_data(
-    tokenizer, 
+    tokenizer,
     context_max_length,
     labels_max_length,
-    context, 
+    context,
     personas,
-    search_labels):
-    #Join all replies in one string line
+    search_labels
+):
+    # Join all replies in one string line
     context = ["\n".join([i[0] + i[1] + p for i in j[-1:]]) for j, p in zip(context, personas)]
-    context = [i + im.SEARCH_TASK for i in context] 
-    LM      = tokenizer("<LM>").input_ids #<LM> prefix only for FRED models
+    context = [i + im.SEARCH_TASK for i in context]
+    LM = tokenizer("<LM>").input_ids   # <LM> prefix only for FRED models
 
     ids = tokenizer(
         context,
         max_length=context_max_length - 1,
         padding=True,
         truncation=True
-        )
+    )
     ids, mask = ids.input_ids, ids.attention_mask
-    ids  = [LM + i for i in ids]
+    ids = [LM + i for i in ids]
     mask = [[1] + i for i in mask]
 
     labels = get_labels(search_labels, tokenizer, labels_max_length, im.SEARCH_RESULT)
 
-    ids    = torch.LongTensor(ids)
-    mask   = torch.LongTensor(mask)
+    ids = torch.LongTensor(ids)
+    mask = torch.LongTensor(mask)
     labels = torch.LongTensor(labels)
 
     return ids, mask, labels
@@ -392,10 +393,11 @@ def get_knowledge_data(
     passage_count,
     context,
     knowledge_passages,
-    knowledge):
-    #Join all replies in one string line
+    knowledge
+):
+    # Join all replies in one string line
     context = ["\n".join([i[0] + i[1] for i in j]) for j in context]
-    LM      = tokenizer("<LM>").input_ids #<LM> prefix only for FRED models
+    LM = tokenizer("<LM>").input_ids   # <LM> prefix only for FRED models
 
     task_ids = tokenizer.encode(im.KNOWLEDGE_TASK)
 
@@ -406,11 +408,10 @@ def get_knowledge_data(
         truncation=True
     )
     c_ids, c_mask = c_ids.input_ids, c_ids.attention_mask
-    c_ids  = [LM + i for i in c_ids]
+    c_ids = [LM + i for i in c_ids]
     c_mask = [[1] + i for i in c_mask]
 
     pad = tokenizer.pad_token_id
-    eos = tokenizer.eos_token_id
 
     k_ids, k_mask = [], []
     for i in range(len(c_ids)):
@@ -428,7 +429,7 @@ def get_knowledge_data(
             task_id = task_ids * (j == (len(ids) - 1))
             mask_id = [1] * len(task_id)
             cut_off_len = max(0, len(c_ids[i]) + len(task_id) - 2 * passage_max_length)
-            ids[j]  = c_ids[i][:-cut_off_len] + ids[j] + task_id + [
+            ids[j] = c_ids[i][:-cut_off_len] + ids[j] + task_id + [
                 pad for _ in range(3 * passage_max_length - len(c_ids[i][:-cut_off_len]) - len(ids[j]) - len(task_id))
             ]
             mask[j] = c_mask[i][:-cut_off_len] + mask[j] + mask_id + [
@@ -442,12 +443,12 @@ def get_knowledge_data(
         for j in range(len(ids), passage_count):
             if len(k_ids) > 0:
                 batch_idx = random.randint(0, len(k_ids) - 1)
-                elem_idx  = random.randint(0, len(k_ids[batch_idx]) - 1)
+                elem_idx = random.randint(0, len(k_ids[batch_idx]) - 1)
 
                 ids.append(k_ids[batch_idx][elem_idx].copy())
                 mask.append(k_mask[batch_idx][elem_idx].copy())
             else:
-                elem_idx  = random.randint(0, len(ids) - 1)
+                elem_idx = random.randint(0, len(ids) - 1)
 
                 ids.append(ids[elem_idx])
                 mask.append(mask[elem_idx])
@@ -456,8 +457,8 @@ def get_knowledge_data(
         k_mask.append(mask)
 
     labels = get_labels(knowledge, tokenizer, labels_max_length, im.KNOWLEDGE_RESULT)
-    
-    k_ids  = torch.LongTensor(k_ids)
+
+    k_ids = torch.LongTensor(k_ids)
     k_mask = torch.LongTensor(k_mask)
     labels = torch.LongTensor(labels)
 
@@ -478,8 +479,8 @@ def get_response_data(
     if knowledge[0] is None:
         knowledge = [im.NO_KNOWLEDGE]
 
-    ids_list   = []
-    mask_list  = []
+    ids_list = []
+    mask_list = []
 
     for c, p, k in zip(context, personas, knowledge):
         # <LM> prefix only for FRED models
@@ -487,9 +488,9 @@ def get_response_data(
 
         ids = tokenizer(
             full_context,
-            max_length = context_max_length - 1,
-            padding = "max_length",
-            truncation = True
+            max_length=context_max_length - 1,
+            padding="max_length",
+            truncation=True
         )
 
         ids, mask = ids.input_ids, ids.attention_mask
@@ -499,7 +500,7 @@ def get_response_data(
 
     labels = get_labels(response_labels, tokenizer, labels_max_length, im.RESPONSE_RESULT)
 
-    ids  = torch.LongTensor(ids_list)
+    ids = torch.LongTensor(ids_list)
     mask = torch.LongTensor(mask_list)
     labels = torch.LongTensor(labels)
 
@@ -509,7 +510,7 @@ def get_response_data(
 def get_labels(tokens, tokenizer, max_length, special_token):
     labels = tokenizer(
         [special_token + i for i in tokens],
-        max_length=max_length-1,
+        max_length=max_length - 1,
         padding=False,
         truncation=True
     ).input_ids
@@ -517,7 +518,7 @@ def get_labels(tokens, tokenizer, max_length, special_token):
     for i in range(len(labels)):
         labels[i].extend([tokenizer.eos_token_id])
         labels[i].extend(-100 for _ in range(max_length - len(labels[i])))
-    
+
     return labels
 
 

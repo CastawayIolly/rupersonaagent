@@ -6,9 +6,9 @@ import model
 from tqdm.auto import tqdm
 
 
-USER1_ACTION  = "Apprentice => Wizard"
-USER2_ACTION  = "Wizard => Apprentice"
-USER2_SEARCH  = "Wizard => SearchAgent"
+USER1_ACTION = "Apprentice => Wizard"
+USER2_ACTION = "Wizard => Apprentice"
+USER2_SEARCH = "Wizard => SearchAgent"
 
 
 class InternetDataset(torch.utils.data.Dataset):
@@ -18,15 +18,16 @@ class InternetDataset(torch.utils.data.Dataset):
             self.data = get_data(path, do_preprocess)
         else:
             self.data = get_wizint_data(path)
-        
+
     def __len__(self):
         return len(self.data)
-    
+
     def __getitem__(self, idx):
         return self.data[idx]
 
+
 def collate_fn(
-    data, 
+    data,
     tokenizer,
     context_max_length,
     passage_max_length
@@ -43,9 +44,9 @@ def collate_fn(
         return_tensors='pt'
     )
     q_ids, q_mask = q.input_ids, q.attention_mask
-    
+
     p = tokenizer(
-        [model.CANDIDATE + i for i in reduce(lambda x,y: x+y, passages)],
+        [model.CANDIDATE + i for i in reduce(lambda x, y: x + y, passages)],
         max_length=passage_max_length,
         padding=True,
         truncation=True,
@@ -57,7 +58,7 @@ def collate_fn(
     # P - passages count
     # Q - questions count
     flat_labels = []
-    labels_len  = [len(i) for i in labels]
+    labels_len = [len(i) for i in labels]
 
     for i, elem in enumerate(labels):
         labels_elem = [0 for _ in range(sum(labels_len[:i]))]
@@ -70,6 +71,7 @@ def collate_fn(
 
     return (q_ids, q_mask, p_ids, p_mask, flat_labels)
 
+
 def get_data(path, do_preprocess=False):
     result = []
     with open(path, 'r', encoding='utf-8') as f:
@@ -79,15 +81,16 @@ def get_data(path, do_preprocess=False):
             if do_preprocess:
                 data = preprocess(data)
 
-            q, p, l = parse(data)
+            q, p, labels = parse(data)
 
             result.append({
                 "questions": q,
                 "passages": p,
-                "labels": l
+                "labels": labels
             })
 
     return result
+
 
 def get_wizint_data(path):
     result = []
@@ -106,7 +109,7 @@ def get_wizint_data(path):
             for elem in dialog:
                 if elem['context'] != {} and elem['context']['contents'] != [] and 'selected_contents' in elem['context']:
                     labels = reduce(lambda x, y: x + y, elem['context']['selected_contents'][1:])
-                    texts  = reduce(lambda x, y: x + y, [i['content'] for i in elem['context']['contents']])
+                    texts = reduce(lambda x, y: x + y, [i['content'] for i in elem['context']['contents']])
 
                     result.append({
                         "questions": context,
@@ -121,6 +124,7 @@ def get_wizint_data(path):
                     context += model.SEARCH_RESULT + elem['text']
     return result
 
+
 def parse(data):
     question = data['query']
     passages = [i['text'] for i in data['positive_passages']]
@@ -131,15 +135,16 @@ def parse(data):
 
     return question, passages, labels
 
+
 def preprocess(data):
     data['query'] = data['query'].replace("\xa0", " ")
 
     for i in data['positive_passages']:
-        i['text']  = i['text'].replace("\xa0", " ")
+        i['text'] = i['text'].replace("\xa0", " ")
         i['title'] = i['title'].replace("\xa0", " ")
-    
+
     for i in data['negative_passages']:
-        i['text']  = i['text'].replace("\xa0", " ")
+        i['text'] = i['text'].replace("\xa0", " ")
         i['title'] = i['title'].replace("\xa0", " ")
-    
+
     return data
