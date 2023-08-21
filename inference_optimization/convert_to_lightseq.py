@@ -17,15 +17,18 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 
 """
-For the mapping dictionary: key is the value of the proto parameter, value is a powerful expression, each && split tensor name of the matching path or expression.
-The sub-pattern of the path is separated by spaces, and the expression starts with a expression_. You can operate separately on each tensor and support multiple expressions. Multiple matching paths
+For the mapping dictionary: key is the value of the proto parameter, value is a powerful expression,
+each && split tensor name of the matching path or expression.
+The sub-pattern of the path is separated by spaces, and the expression starts with a expression_.
+You can operate separately on each tensor and support multiple expressions. Multiple matching paths
 and the expression will finally be concatenated on axis = -1.
 """
 
-enc_layer_mapping_dict = OrderedDict(
+ENC_LAYER_MAPPING_DICT = OrderedDict(
     {
         "multihead_norm_scale": "zero layer_norm weight",
-        "multihead_project_kernel_qkv": "SelfAttention q weight&&SelfAttention k weight&&SelfAttention v weight&&expression_.transpose(0, 1)",
+        "multihead_project_kernel_qkv": "SelfAttention q weight&&SelfAttention k weight&&SelfAttention "
+                                        "v weight&&expression_.transpose(0, 1)",
         "multihead_project_kernel_output": "SelfAttention o weight&&expression_.transpose(0, 1)",
         "ffn_norm_scale": "one layer_norm weight",
         "ffn_first_kernel": "DenseReluDense wi weight&&expression_.transpose(0, 1)",
@@ -33,10 +36,11 @@ enc_layer_mapping_dict = OrderedDict(
     }
 )
 
-dec_layer_mapping_dict = OrderedDict(
+DEC_LAYER_MAPPING_DICT = OrderedDict(
     {
         "self_norm_scale": "zero layer_norm weight",
-        "self_project_kernel_qkv": "SelfAttention q weight&&SelfAttention k weight&&SelfAttention v weight&&expression_.transpose(0, 1)",
+        "self_project_kernel_qkv": "SelfAttention q weight&&SelfAttention k weight&&SelfAttention "
+                                   "v weight&&expression_.transpose(0, 1)",
         "self_project_kernel_output": "SelfAttention o weight&&expression_.transpose(0, 1)",
         "encdec_norm_scale": "one layer_norm weight",
         "encdec_project_kernel_q": "EncDecAttention q weight&&expression_.transpose(0, 1)",
@@ -47,13 +51,13 @@ dec_layer_mapping_dict = OrderedDict(
     }
 )
 
-src_emb_mapping_dict = OrderedDict(
+SRC_EMB_MAPPING_DICT = OrderedDict(
     {
         "norm_scale": "final_layer_norm weight",
     }
 )
 
-trg_emb_mapping_dict = OrderedDict(
+TRG_EMB_MAPPING_DICT = OrderedDict(
     {
         "norm_scale": "final_layer_norm weight",
     }
@@ -152,7 +156,7 @@ def save_t5_proto_to_hdf5(transformer: Transformer, f: h5py.File):
         "model_conf": MODEL_CONF_KEYS,
     }
 
-    print(f"start converting protobuf to hdf5 format.")
+    print("start converting protobuf to hdf5 format.")
     # load src_embedding, trg_embedding, model_conf
     for base_attr, keys in base_attr_to_keys.items():
         for key in keys:
@@ -165,10 +169,8 @@ def save_t5_proto_to_hdf5(transformer: Transformer, f: h5py.File):
 
             print(f"loading transformer {proto_attr} -> {hdf5_key}")
             _data = attrgetter(proto_attr)(transformer)
-            if type(_data) is str:
-                print(
-                    f"find type str, explicitly convert string to ascii encoded array."
-                )
+            if isinstance(_data, str):
+                print("find type str, explicitly convert string to ascii encoded array.")
                 # explict convert to array of char (int8) to avoid issues on string reading in C
                 _data = np.array([ord(c) for c in _data]).astype(np.int8)
             f.create_dataset(hdf5_key, data=_data)
@@ -193,14 +195,14 @@ def save_t5_proto_to_hdf5(transformer: Transformer, f: h5py.File):
             print(f"loading transformer.decoder_stack {proto_attr} -> {hdf5_key}")
             f.create_dataset(hdf5_key, data=attrgetter(proto_attr)(layer))
 
-    print(f"proto to hdf5 conversion completed.")
+    print("proto to hdf5 conversion completed.")
 
 
-def count_digit(s):
-    return sum(1 for c in s if c.isdigit())
+def count_digit(string):
+    return sum(1 for char in string if char.isdigit())
 
 
-def replace_second_digit(s):
+def replace_second_digit(string):
     table = {
         "0": "zero",
         "1": "one",
@@ -210,15 +212,14 @@ def replace_second_digit(s):
         "5": "five",
     }
 
-    seen = False
-    s = list(s)
+    string = list(string)
     pos_digit = -1
-    for i in range(len(s)):
-        if s[i].isdigit():
+    for i in range(len(string)):
+        if string[i].isdigit():
             pos_digit = i
     if pos_digit != -1:
-        s[pos_digit] = table[s[pos_digit]]
-    return "".join(s)
+        string[pos_digit] = table[string[pos_digit]]
+    return "".join(string)
 
 
 def extract_transformer_weights(
@@ -232,7 +233,6 @@ def extract_transformer_weights(
     length_penalty: float = 0,
     topk=1,
     topp=0.75,
-    lang="en",
     only_decoder=True,
     save_proto=False,
 ):
@@ -276,7 +276,7 @@ def extract_transformer_weights(
                 enc_tensor_names[layer_id],
                 encoder_state_dict,
                 transformer.encoder_stack.add(),
-                enc_layer_mapping_dict,
+                ENC_LAYER_MAPPING_DICT,
             )
 
     # fill each decoder layer's params
@@ -293,7 +293,7 @@ def extract_transformer_weights(
             dec_tensor_names[layer_id],
             decoder_state_dict,
             transformer.decoder_stack.add(),
-            dec_layer_mapping_dict,
+            DEC_LAYER_MAPPING_DICT,
         )
 
     # fill src_embedding
@@ -302,7 +302,7 @@ def extract_transformer_weights(
             enc_var_name_list,
             encoder_state_dict,
             transformer.src_embedding,
-            src_emb_mapping_dict,
+            SRC_EMB_MAPPING_DICT,
         )
 
         relative_attention_bias_list = (
@@ -316,7 +316,8 @@ def extract_transformer_weights(
         transformer.src_embedding.position_embedding[:] = relative_attention_bias_list
 
         print(
-            "encoder.block.0.layer.0.SelfAttention.relative_attention_bias.weight -> src_embedding.position_embedding, shape: {}, conversion finished!".format(
+            "encoder.block.0.layer.0.SelfAttention.relative_attention_bias.weight "
+            "-> src_embedding.position_embedding, shape: {}, conversion finished!".format(
                 encoder_state_dict[
                     "encoder.block.0.layer.zero.SelfAttention.relative_attention_bias.weight"
                 ]
@@ -332,13 +333,13 @@ def extract_transformer_weights(
 
     # fill trg_embedding
     encode_output_mapping_dict = _get_encode_output_mapping_dict(len(dec_tensor_names))
-    trg_emb_mapping_dict.update(encode_output_mapping_dict)
+    TRG_EMB_MAPPING_DICT.update(encode_output_mapping_dict)
 
     fill_pb_layer(
         dec_var_name_list,
         decoder_state_dict,
         transformer.trg_embedding,
-        trg_emb_mapping_dict,
+        TRG_EMB_MAPPING_DICT,
     )
 
     decoder_relative_attention_bias_list = (
@@ -354,7 +355,8 @@ def extract_transformer_weights(
         :
     ] = decoder_relative_attention_bias_list
     print(
-        "decoder.block.0.layer.0.SelfAttention.relative_attention_bias.weight -> trg_embedding.position_embedding, shape: {}, conversion finished!".format(
+        "decoder.block.0.layer.0.SelfAttention.relative_attention_bias.weight ->"
+        " trg_embedding.position_embedding, shape: {}, conversion finished!".format(
             decoder_state_dict[
                 "decoder.block.0.layer.zero.SelfAttention.relative_attention_bias.weight"
             ]
