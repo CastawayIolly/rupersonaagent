@@ -480,7 +480,7 @@ class CosplayRLAgent(Agent):
         shared['NULL_IDX'] = self.NULL_IDX
         # if self.opt.get('numthreads', 1) > 1:
         # we're doing hogwild so share the model too
-        if type(self.metrics) == dict:
+        if isinstance(self.metrics, dict):
             # move metrics and model to shared memory
             self.metrics = SharedTable(self.metrics)
             self.cosplay.share_memory()
@@ -646,9 +646,9 @@ class CosplayRLAgent(Agent):
         obs = observation.copy()
 
         if self.is_training:
-            assert type(observation) == list
+            assert isinstance(observation, list)
         else:
-            assert type(observation) == dict
+            assert isinstance(observation, dict)
             obs = [obs]
 
         first_obs = obs[0]

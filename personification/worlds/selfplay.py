@@ -11,9 +11,9 @@ import torch
 
 def validate(observation):
     """Make sure the observation table is valid, or raise an error."""
-    if observation is not None and type(observation) == dict:
+    if observation is not None and isinstance(observation,dict):
         return observation
-    elif type(observation) == list:
+    elif isinstance(observation, list):
         return observation
     else:
         raise RuntimeError('Must return dictionary from act().')

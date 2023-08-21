@@ -634,7 +634,7 @@ class TransformerAgent(Agent):
         shared['model'] = self.model
         if self.opt.get('numthreads', 1) > 1:
             # we're doing hogwild so share the model too
-            if type(self.metrics) == dict:
+            if isinstance(self.metrics, dict):
                 # move metrics and model to shared memory
                 self.metrics = SharedTable(self.metrics)
                 self.model.share_memory()

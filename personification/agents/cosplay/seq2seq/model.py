@@ -664,7 +664,7 @@ class AttentionLayer(nn.Module):
         if self.attention == 'none':
             return xes
 
-        if type(hidden) == tuple:
+        if isinstance(hidden, tuple):
             # for lstms use the "hidden" state not the cell state
             hidden = hidden[0]
         last_hidden = hidden[-1]  # select hidden state from last RNN layer
