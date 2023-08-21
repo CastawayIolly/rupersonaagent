@@ -20,7 +20,7 @@ def get_hparams():
 class HParams:
     def __init__(self, **kwargs):
         for k, v in kwargs.items():
-            if type(v) == dict:
+            if isinstance(v, dict):
                 v = HParams(**v)
             self[k] = v
 
