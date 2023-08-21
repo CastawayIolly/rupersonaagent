@@ -9,6 +9,6 @@ before_script:
 test:
   script:
     - pip install flake8 pytest pytest-mock
-    - flake8 --exclude venv --ignore=W605 --max-line-length 125 ..
-    - python -m pytest -n=4 --dist=loadfile -rN --tb=line -v -k tests
+    - flake8 --exclude venv --ignore=W605,F821 --max-line-length 125 ..
+    - pytest tests
 

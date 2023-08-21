@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from speech_extraction.SpeechExtraction import (
+from rupersonaagent.speech_extraction.SpeechExtraction import (
     read_dataset,
     get_sentence_and_words,
     get_pos_tags,
