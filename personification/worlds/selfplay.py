@@ -11,7 +11,7 @@ import torch
 
 def validate(observation):
     """Make sure the observation table is valid, or raise an error."""
-    if observation is not None and isinstance(observation,dict):
+    if observation is not None and isinstance(observation, dict):
         return observation
     elif isinstance(observation, list):
         return observation
