@@ -1,0 +1,58 @@
+{
+    "experiment_path": "experiments/exp6-t5-tiny-KD-from-exp2/",
+    "data": {
+        "val_size": 0.05,
+        "datasets": [
+            "data/Толока Персона Чат/TolokaPersonaChat_gk_1_500.jsonl",
+            "data/Толока Персона Чат/TolokaPersonaChat_1_500_gk_test.jsonl",
+            "data/Толока Персона Чат/gk(test)Stipa.jsonl",
+            "data/Толока Персона Чат/TolokaPersonaChat_genderized_gk(test)v2.jsonl",
+            "data/t5-small-chitchat-finetuned-generation/dialogs.jsonl"
+        ]
+    },
+    "train": {
+        "batch_size": 32,
+        "max_history_tokens": 512,
+        "max_history_messages": 4,
+        "report_steps": 200,
+        "save_steps": 1000,
+        "epochs": 15,
+        "lr": 3e-4,
+        "weight_decay": 0.1
+    },
+    "tokenizer": {
+        "huggingface_path": "cointegrated/rut5-small-chitchat"
+    },
+    "model": {
+        "t5_config": {
+            "architectures": [
+                "T5ForConditionalGeneration"
+            ],
+            "d_ff": 1024,
+            "d_kv": 64,
+            "d_model": 512,
+            "decoder_start_token_id": 0,
+            "dense_act_fn": "gelu_new",
+            "dropout_rate": 0.1,
+            "eos_token_id": 1,
+            "feed_forward_proj": "gated-gelu",
+            "gradient_checkpointing": false,
+            "initializer_factor": 1.0,
+            "is_encoder_decoder": true,
+            "is_gated_act": true,
+            "layer_norm_epsilon": 1e-06,
+            "model_type": "t5",
+            "num_decoder_layers": 6,
+            "num_heads": 6,
+            "num_layers": 6,
+            "pad_token_id": 0,
+            "relative_attention_max_distance": 128,
+            "relative_attention_num_buckets": 32,
+            "tie_word_embeddings": false,
+            "tokenizer_class": "T5Tokenizer",
+            "transformers_version": "4.28.0",
+            "use_cache": true,
+            "vocab_size": 20100
+        }
+    }
+}
