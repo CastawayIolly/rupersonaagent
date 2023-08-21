@@ -18,6 +18,7 @@ class TestSpeechExtraction:
 
     def test_get_sentence_and_words(self):
         test_data = pd.Series({'text': 'I like cookies'})
+        get_sentence_and_words(test_data)
         assert_that(get_sentence_and_words(test_data), equal_to((1, 3, 4.0, 0, 1)))
 
     def test_get_pos_tags(self):
