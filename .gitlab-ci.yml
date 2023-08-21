@@ -5,7 +5,7 @@ before_script:
   - pip install virtualenv
   - virtualenv venv
   - source venv/bin/activate
-  - python install setup.py
+  - python setup.py install
 
 test:
   script:
