@@ -24,9 +24,9 @@ def get_sentence_and_words(dataset):
     punctuations = []
     letters = string.ascii_letters
     punctuation = string.punctuation
-    for v in dataset.values():
-        sentences.append(len(sent_tokenize(v)))
-        for sent in sent_tokenize(v):
+    for key, value in dataset.iteritems():
+        sentences.append(len(sent_tokenize(value)))
+        for sent in sent_tokenize(value):
             words_count = len(word_tokenize(sent))
             words.append(words_count)
             letter_count = len(
@@ -47,7 +47,7 @@ def get_sentence_and_words(dataset):
 
 
 def get_pos_tags(dataset, size):
-    text = ' '.join([v for v in dataset.values()])
+    text = ' '.join([v for k, v in dataset.iteritems()])
     tokens = nltk.word_tokenize(text.lower())
     new_text = nltk.Text(tokens)
     tags = nltk.pos_tag(new_text)

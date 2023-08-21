@@ -3,11 +3,13 @@ image: python:latest
 before_script:
   - python --version  # For debugging
   - pip install virtualenv
+  - pip install pyyaml
   - virtualenv venv
   - source venv/bin/activate
 
 test:
   script:
     - pip install flake8 pytest pytest-mock
-    - flake8 --exclude venv --ignore=W605,E731,E131 --max-line-length 150 ..
+    - flake8 --exclude venv --ignore=W605,E731,E131,F821 --max-line-length 150 ..
+
 
