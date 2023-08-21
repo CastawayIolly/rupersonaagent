@@ -2,7 +2,6 @@ import ast
 import re
 from pathlib import Path
 from typing import List
-from transformers import T5ForConditionalGeneration, T5Tokenizer
 
 
 def read_jsonl_data(jsonl_path: Path) -> List[dict]:

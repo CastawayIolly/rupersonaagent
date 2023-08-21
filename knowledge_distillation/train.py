@@ -150,7 +150,7 @@ def train(
         logger.info(f"EPOCH {epoch}")
         pairs_train = pairs_train.sample(frac=1)
         for i in trange(0, int(len(pairs_train) / batch_size), leave=False, position=0):
-            batch = pairs_train.values[i * batch_size : (i + 1) * batch_size]
+            batch = pairs_train.values[i * batch_size:(i + 1) * batch_size]
 
             x = tokenizer([p[0] for p in batch], return_tensors="pt", padding="longest")
             x = {k: v.to(model.device, non_blocking=True) for k, v in x.items()}
@@ -215,7 +215,7 @@ def eval(
 
     pairs = pairs.sample(frac=1)
     for i in trange(0, int(len(pairs) / batch_size), leave=False, position=1):
-        batch = pairs.values[i * batch_size : (i + 1) * batch_size]
+        batch = pairs.values[i * batch_size:(i + 1) * batch_size]
 
         x = tokenizer([p[0] for p in batch], return_tensors="pt", padding="longest")
         x = {k: v.to(model.device, non_blocking=True) for k, v in x.items()}

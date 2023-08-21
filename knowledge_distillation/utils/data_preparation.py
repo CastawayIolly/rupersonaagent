@@ -1,5 +1,5 @@
 import random
-from pathlib import Path
+
 from typing import Any, Dict, List, Tuple
 
 from tqdm.auto import tqdm
@@ -68,8 +68,7 @@ def make_pairs(
             historical_text = dialog_pairs[-1][0][offset:] + [text]
 
             while (
-                len(tokenizer("</s>".join(historical_text)).input_ids)
-                > max_history_tokens
+                len(tokenizer("</s>".join(historical_text)).input_ids) > max_history_tokens
             ):
                 offset += 1
                 historical_text = dialog_pairs[-1][0][offset:] + [text]
