@@ -13,3 +13,7 @@ internet_memory_model/retriever/data
 internet_memory_model/models/
 internet_memory_model/pretrained_models/
 internet_memory_model/data/
+persofication/data
+persofication/parlai
+.idea
+.DS_Store

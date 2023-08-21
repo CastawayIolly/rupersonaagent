@@ -1,12 +1,8 @@
 import os
-import random
-import json
 import torch
-import transformers
 import datasets as ds
-import pandas as pd
 import pytorch_lightning as pl
-from typing import *
+from typing import List
 
 
 class TolokaDataModule(pl.LightningDataModule):
@@ -35,7 +31,7 @@ class TolokaDataModule(pl.LightningDataModule):
     def train_dataloader(self):
         try:
             ep = self.trainer.current_epoch
-        except:
+        except Exception:
             ep = 0
         # shuffle train split
         datasets = {
@@ -68,7 +64,7 @@ class TolokaDataModule(pl.LightningDataModule):
     def val_dataloader(self):
         try:
             ep = self.trainer.current_epoch
-        except:
+        except Exception:
             ep = 0
         # shuffle train split
         datasets = {
@@ -100,9 +96,9 @@ class TolokaDataModule(pl.LightningDataModule):
 
     def test_dataloader(self):
         try:
-            ep = self.trainer.current_epoch
-        except:
-            ep = 0
+            return self.trainer.current_epoch
+        except Exception:
+            return 0
 
 
 class MainCollator:

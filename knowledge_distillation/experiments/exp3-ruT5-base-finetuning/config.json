@@ -1,0 +1,28 @@
+{
+    "experiment_path": "experiments/exp3-ruT5-base-finetuning/",
+    "data": {
+        "val_size": 0.05,
+        "datasets": [
+            "data/Толока Персона Чат/TolokaPersonaChat_gk_1_500.jsonl",
+            "data/Толока Персона Чат/TolokaPersonaChat_1_500_gk_test.jsonl",
+            "data/Толока Персона Чат/gk(test)Stipa.jsonl",
+            "data/Толока Персона Чат/TolokaPersonaChat_genderized_gk(test)v2.jsonl"
+        ]
+    },
+    "train": {
+        "batch_size": 16,
+        "max_history_tokens": 512,
+        "max_history_messages": 6,
+        "report_steps": 200,
+        "save_steps": 1000,
+        "epochs": 10,
+        "lr": 3e-4,
+        "weight_decay": 0.5
+    },
+    "tokenizer": {
+        "huggingface_path": "ai-forever/ruT5-base"
+    },
+    "model": {
+        "huggingface_path": "ai-forever/ruT5-base"
+    }
+}
