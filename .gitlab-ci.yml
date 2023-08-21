@@ -3,6 +3,7 @@ image: python:latest
 before_script:
   - python --version  # For debugging
   - pip install virtualenv
+  - pip install yaml
   - virtualenv venv
   - source venv/bin/activate
   - python setup.py install
