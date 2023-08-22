@@ -94,7 +94,7 @@ setup(
         'six==1.16.0',
         'spacy==3.6.1',
         'scikit-learn==1.3.0',
-        'tensorboard==2.11.0',
+        'tensorboard==2.13.0',
         'tensorboard-data-server==0.6.1',
         'tensorboard-plugin-wit==1.8.1',
         'tensorboardx==2.5.0',
