@@ -1,11 +1,7 @@
-image: python:latest
+image: python:3.8.17-slim-bullseye
 
 before_script:
-  - python --version  # For debugging
-  - pip install virtualenv
-  - pip install pyyaml
-  - virtualenv venv
-  - source venv/bin/activate
+  - python setup.py install
 
 test:
   script:

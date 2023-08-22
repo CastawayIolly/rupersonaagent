@@ -9,7 +9,7 @@ from generative_model.data_module import TolokaDataModule
 from hamcrest import assert_that, equal_to
 
 
-@pytest.mark.generative
+@pytest.mark.gpu
 class TestGenerativeModel:
     self.tokenizer = transformers.AutoTokenizer.from_pretrained("cointegrated/rut5-base-multitask",
                                                                 truncation_side='left',
