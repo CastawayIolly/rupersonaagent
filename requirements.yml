@@ -42,7 +42,7 @@ dependencies:
     - commonmark==0.9.1
     - contourpy==1.0.6
     - cycler==0.11.0
-    - datasets==2.7.1
+    - datasets==2.2.2
     - dill==0.3.6
     - docstring-parser==0.15
     - fake-useragent==1.2.1
