@@ -29,6 +29,7 @@ setup(
         'docstring-parser==0.15',
         'fake-useragent==1.2.1',
         'filelock==3.8.0',
+        'flake8==5.0.4',
         'fire==0.4.0',
         'fonttools==4.38.0',
         'frozenlist==1.3.3',
