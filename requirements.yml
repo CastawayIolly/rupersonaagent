@@ -128,7 +128,7 @@ dependencies:
     - typing-extensions==4.4.0
     - urllib3==1.26.12
     - werkzeug==2.2.2
-    - xxhash==3.1.0
+    - xxhash==3.3.0
     - yarl==1.8.1
     - nltk==3.7
     - scipy==1.10.1
