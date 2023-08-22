@@ -41,6 +41,7 @@ setup(
         'huggingface-hub==0.11.0',
         'hydra-core==1.1.2',
         'idna==3.4',
+        'importlib-resources==5.2',
         'jsonlines==3.1.0',
         'jsonargparse==4.17.0',
         'jsonschema==4.17.3',
