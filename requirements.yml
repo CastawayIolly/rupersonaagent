@@ -119,7 +119,7 @@ dependencies:
     - tensorflow==2.13.0
     - termcolor==2.1.0
     - tokenizers==0.13.2
-    - tomli==2.0.1
+    - tomli==1.2.3
     - torch==1.13.0
     - torch-tb-profiler==0.4.0
     - torchmetrics==0.10.3
