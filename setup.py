@@ -70,7 +70,7 @@ setup(
         'peft==0.4.0',
         'pillow==9.3.0',
         'platformdirs==2.5.4',
-        'protobuf==3.20.3',
+        'protobuf==3.19',
         'psutil==5.9.4',
         'pymorphy2==0.9.1',
         'pyarrow==10.0.1',
