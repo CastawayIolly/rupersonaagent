@@ -78,7 +78,7 @@ dependencies:
     - nvidia-cuda-runtime-cu11==11.7.99
     - nvidia-cudnn-cu11==8.5.0.96
     - oauthlib==3.2.2
-    - omegaconf==2.2.3
+    - omegaconf==2.1.2
     - orderedmultidict==1.0.1
     - packaging==21.3
     - parlai==1.6.0
