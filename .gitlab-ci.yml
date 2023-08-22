@@ -1,4 +1,4 @@
-image: python:latest
+image: python:3.8.17-slim-bullseye
 
 before_script:
   - python setup.py install
