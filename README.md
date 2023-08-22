@@ -22,8 +22,11 @@ The rupersonaagent library is designed for quick and easy development of a Russi
 
 * Speech Extraction
 * Generative Model
-* Long-term memory
+* Long-term and Internet memory
 * Persona Knowledge Extraction
+* Rule Based Information Extraction
+* Inference Optimization
+
 
 
 
@@ -36,6 +39,8 @@ RuPersonaAgent can be installed with ``pip``:
 ```
 
 ## Examples
+
+[link for usage examples](https://habr.com/ru/companies/spbifmo/articles/755514/)
 
 
 ## Project Structure
@@ -64,19 +69,7 @@ Gratitude to [ITMO University](https://itmo.ru) for sponsoring and supporting th
 ## Citation
 
 
-@article{"persona",
-  title = {Persona Knowledge Extraction from Dialog Data in Russian Language},
-  author = {Pavel Posokhov, Ekaterina Rudaleva, Stepan Skrylnikov, Olesia Makhnytkina, Vladimir Kabarov},
-  journal = {},
-  year = {2023},
-  issn = {},
-  doi = {}}
+Матвеева А.А., Махныткина О.В. Метод аугментации текстовых данных с сохранением стиля речи и лексики персоны // Научно-технический вестник информационных технологий, механики и оптики. 2023. Т. 23, № 4. С. 743–749. doi: 10.17586/2226-1494-2023-23-4-743-749
 
-@article{"persona2",
-  title = {Application of Internet search to improve the dialogue model in Russian},
-  author = {},
-  journal = {},
-  year = {2023},
-  issn = {},
-  doi = {}}
+Посохов П.А., Рудалева Е.А., Скрыльников С.С., Махныткина О.В., Кабаров В.И. Извлечение информации о персоне из диалоговых данных на русском языке //Информационные технологии. - 2023. в печати
 
