@@ -10,7 +10,7 @@ from hamcrest import assert_that, equal_to
 
 class TestSpeechExtraction:
     def test_read_dataset(self):
-        dataset_value = read_dataset('test_name', 'test_dataset.csv', 'RowId', ',')
+        dataset_value = read_dataset('test_name', 'tests/test_dataset.csv', 'RowId', ',')
         assert_that(dataset_value[1], equal_to("test_name"))
         assert_that(list(dataset_value[0].iteritems())[0], equal_to((0, 0)))
 

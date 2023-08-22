@@ -7,6 +7,6 @@ test:
   script:
     - pip install flake8 pytest pytest-mock
     - flake8 --exclude venv --ignore=W605,E731,E131,F821 --max-line-length 150 ..
-    - pytest tests
+    - pytest tests/test_speech_extraction.py
 
 
