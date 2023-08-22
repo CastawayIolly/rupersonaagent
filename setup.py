@@ -98,7 +98,7 @@ setup(
         'tensorboard-data-server==0.6.1',
         'tensorboard-plugin-wit==1.8.1',
         'tensorboardx==2.5.0',
-        'tensorflow',
+        'tensorflow==2.12.0',
         'termcolor==2.1.0',
         'tokenizers==0.13.2',
         'tomli==1.2.3',
