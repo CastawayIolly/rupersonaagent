@@ -1,8 +1,7 @@
-image: continuumio/miniconda3:latest
+image: python:latest
 
 before_script:
-  - conda env create -f requirements.yml
-  - source activate koopa
+  - python setup.py install
 
 test:
   script:
