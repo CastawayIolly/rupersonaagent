@@ -64,7 +64,6 @@ setup(
         'omegaconf==2.1.2',
         'orderedmultidict==1.0.1',
         'packaging==21.3',
-        'parlai==1.6.0',
         'pandas==1.5.1',
         'pathlib2==2.3.7.post1',
         'pathspec==0.10.2',
