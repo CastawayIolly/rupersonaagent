@@ -3,7 +3,7 @@
 
 ## The purpose of the project
 The rupersonaagent library is designed for quick and easy development of a Russian-language personalized conversational agent with dynamic long-term memory. Each method and model can also be used separately for purposes other than developing a conversational agent.
-
+The library works with python3.8
 ## Table of Contents
 
 -  [Core features](#core-features)
