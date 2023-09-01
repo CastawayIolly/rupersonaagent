@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "rupersonaagent"
+version = "0.1.0"
+description = "library for creating a Russian-language dialog assistant"
+authors = ["Your Name <you@example.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://gitlab.com/Iolly/rupersonaagent"
+packages = [
+    { include = "generative_model" },
+    { include = "inference_optimization" },
+    { include = "internet_memory_model" },
+    { include = "knowledge_distillation" },
+    { include = "personification" },
+    { include = "rule_based_information_extraction" },
+    { include = "speech_extraction" },
+]
+
+[tool.poetry.dependencies]
+python = "3.11.4"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
