@@ -44,11 +44,12 @@ class FiDAgent:
         
         passage_ids, passage_masks = src.data.encode_passages([passages], self.tokenizer, self.text_maxlength)
 
-        reply = self.model.generate(
-                input_ids=passage_ids.cuda(),
-                attention_mask=passage_masks.cuda(),
-                max_length=100,
-            )
+        with torch.no_grad():
+            reply = self.model.generate(
+                    input_ids=passage_ids.cuda(),
+                    attention_mask=passage_masks.cuda(),
+                    max_length=100,
+                )
         
         reply = self.tokenizer.decode(reply[0], skip_special_tokens=True)
         
