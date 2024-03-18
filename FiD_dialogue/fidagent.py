@@ -10,6 +10,13 @@ import src.model
 
 class FiDAgent:
     def __init__(self, model_path, context_length, device, text_maxlength=200) -> None:
+        '''
+            model_path - path containing a model checkpoint 
+            context_length - how many utterances get added to the dialogue history (including both bot and speaker)
+            text_maxlength - max length of each passage that gets passed to the network (a passage includes the last utterance, 
+                             one persona trait and the dialogue history). If the passage is too long, it gets truncated on the right.
+            device - cpu or gpu 
+        '''
         self.context_length = context_length
         self.context = []
         

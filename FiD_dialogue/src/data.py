@@ -89,10 +89,11 @@ def encode_passages(batch_text_passages, tokenizer, max_length):
     return passage_ids, passage_masks.bool()
 
 class Collator(object):
-    def __init__(self, text_maxlength, tokenizer, answer_maxlength=20):
+    def __init__(self, text_maxlength, tokenizer, answer_maxlength=20, last_n = 5):
         self.tokenizer = tokenizer
         self.text_maxlength = text_maxlength
         self.answer_maxlength = answer_maxlength
+        self.last_n = 5
 
     def __call__(self, batch):
         assert(batch[0]['target'] != None)
@@ -113,8 +114,8 @@ class Collator(object):
             if example['passages'] is None:
                 return [example['question']]
             
+            last_n = self.last_n
             
-            last_n = 5
             results = []
             for t in example['passages']:
                 splits = t.split("Пользователь")
@@ -123,7 +124,6 @@ class Collator(object):
                 else:
                     result = example['question'] + " " + "\n\nПользователь".join(splits)
                 results.append(result)
-            # result = [example['question'] + " " + t for t in example['passages']]
             
             return results
         text_passages = [append_question(example) for example in batch]

@@ -189,7 +189,7 @@ if __name__ == "__main__":
 
     #load data
     tokenizer = transformers.T5Tokenizer.from_pretrained("/home/stc/disk/tirskikh/ruT5-base", truncation_side="right")
-    collator = src.data.Collator(opt.text_maxlength, tokenizer, answer_maxlength=opt.answer_maxlength)
+    collator = src.data.Collator(opt.text_maxlength, tokenizer, answer_maxlength=opt.answer_maxlength, last_n=opt.last_n)
 
     # use golbal rank and world size to split the eval set on multiple gpus
     train_examples = src.data.load_data(

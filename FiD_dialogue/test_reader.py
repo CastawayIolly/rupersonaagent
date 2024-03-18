@@ -107,7 +107,7 @@ if __name__ == "__main__":
     # tokenizer = transformers.T5Tokenizer.from_pretrained('t5-base', return_dict=False)
     tokenizer = transformers.T5Tokenizer.from_pretrained("/home/stc/disk/tirskikh/ruT5-base", truncation_side="right")
 
-    collator_function = src.data.Collator(opt.text_maxlength, tokenizer)
+    collator_function = src.data.Collator(opt.text_maxlength, tokenizer, answer_maxlength=opt.answer_maxlength, last_n=opt.last_n)
     eval_examples = src.data.load_data(
         opt.eval_data, 
         global_rank=opt.global_rank, #use the global rank and world size attibutes to split the eval set on multiple gpus
