@@ -60,20 +60,6 @@ python train_reader.py \
 
 Tensors of variable sizes lead to memory overhead. Encoder input tensors have a fixed size by default, but not the decoder input tensors. The tensor size on the decoder side can be fixed using `--answer_maxlength`.
 
-```shell
-python train_reader.py \
-        --use_checkpoint \
-        --lr 0.00005 \
-        --optim adamw \
-        --scheduler linear \
-        --weight_decay 0.01 \
-        --text_maxlength 250 \
-        --per_gpu_batch_size 1 \
-        --n_context 100 \
-        --total_step 15000 \
-        --warmup_step 1000 \
-```
-
 ## Test
 
 You can evaluate your model or a pretrained model with [`test_reader.py`](test_reader.py). An example usage of the script is provided below.
