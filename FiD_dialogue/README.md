@@ -41,7 +41,7 @@ Since a dialog consists of consecutive utterances, for a dialog where the bot ha
 
 Fusion-in-Decoder models can be trained using [`train_reader.py`](train_reader.py) and evaluated with [`test_reader.py`](test_reader.py).
 
-all the script parameters can be viewed in the src/options.py file.
+all the script parameters can be viewed in the [`options.py`](src/options.py) file.
 
 ## Train
 
