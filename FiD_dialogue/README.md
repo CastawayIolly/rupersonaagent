@@ -37,6 +37,11 @@ Entry example:
 
 Since a dialog consists of consecutive utterances, for a dialog where the bot has n utterances, we will need to create n such entries.
 
+
+For our experiments we used ['Toloka Persona Chat Rus'](https://toloka.ai/ru/datasets/?datasets-category=nlp#datasets).
+
+Data preprocessing was done using ['persona_chat_preprocess.ipynb'](persona_chat_preprocess.ipynb)
+
 # I. Fusion-in-Decoder
 
 Fusion-in-Decoder models can be trained using [`train_reader.py`](train_reader.py) and evaluated with [`test_reader.py`](test_reader.py).
