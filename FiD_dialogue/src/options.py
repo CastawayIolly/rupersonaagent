@@ -5,7 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 
 import argparse
-import os
 from pathlib import Path
 import logging
 
@@ -38,7 +37,7 @@ class Options():
     def add_reader_options(self):
         self.parser.add_argument('--train_data', type=str, default='none', help='path of train data')
         self.parser.add_argument('--eval_data', type=str, default='none', help='path of eval data')
-        self.parser.add_argument('--model_size', type=str, default='base')
+        self.parser.add_argument('--base_model_path', type=str, default='none', help='path to base T5 model and tokenizer')
         self.parser.add_argument('--use_checkpoint', action='store_true', help='use checkpoint in the encoder')
         self.parser.add_argument('--text_maxlength', type=int, default=200, 
                         help='maximum number of tokens in text segments (question+passage)')
@@ -48,6 +47,7 @@ class Options():
                         help='article titles not included in passages')
         self.parser.add_argument('--n_context', type=int, default=1)
         self.parser.add_argument('--last_n', type=int, default=5, help="maximun number of utterances to add to dialogue history")
+        self.parser.add_argument('--output_examples', action='store_true', help="output 10 random examples each validation")
 
 
     def initialize_parser(self):
@@ -99,14 +99,11 @@ class Options():
 
 
 def get_options(use_reader=False,
-                use_retriever=False,
                 use_optim=False,
                 use_eval=False):
     options = Options()
     if use_reader:
         options.add_reader_options()
-    if use_retriever:
-        options.add_retriever_options()
     if use_optim:
         options.add_optim_options()
     if use_eval:

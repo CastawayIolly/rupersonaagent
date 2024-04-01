@@ -12,7 +12,6 @@ import logging
 import json
 from pathlib import Path
 import torch.distributed as dist
-import csv
 
 logger = logging.getLogger(__name__)
 
@@ -32,13 +31,6 @@ def init_logger(is_main=True, is_distributed=False, filename=None):
     logging.getLogger('transformers.tokenization_utils_base').setLevel(logging.ERROR)
     return logger
 
-def get_checkpoint_path(opt):
-    checkpoint_path = Path(opt.checkpoint_dir) / opt.name
-    checkpoint_exists = checkpoint_path.exists()
-    if opt.is_distributed:
-        torch.distributed.barrier()
-    checkpoint_path.mkdir(parents=True, exist_ok=True)
-    return checkpoint_path, checkpoint_exists
 
 def symlink_force(target, link_name):
     try:
@@ -119,13 +111,7 @@ class FixedScheduler(torch.optim.lr_scheduler.LambdaLR):
         super(FixedScheduler, self).__init__(optimizer, self.lr_lambda, last_epoch=last_epoch)
     def lr_lambda(self, step):
         return 1.0
-
-
-def set_dropout(model, dropout_rate):
-    for mod in model.modules():
-        if isinstance(mod, torch.nn.Dropout):
-            mod.p = dropout_rate
-
+    
 
 def set_optim(opt, model):
     if opt.optim == 'adam':
@@ -207,19 +193,3 @@ def save_distributed_dataset(data, opt):
         with open(final_path, 'w') as fout:
             json.dump(alldata, fout, indent=4)
         write_path.rmdir()
-
-def load_passages(path):
-    if not os.path.exists(path):
-        logger.info(f'{path} does not exist')
-        return
-    logger.info(f'Loading passages from: {path}')
-    passages = []
-    with open(path) as fin:
-        reader = csv.reader(fin, delimiter='\t')
-        for k, row in enumerate(reader):
-            if not row[0] == 'id':
-                try:
-                    passages.append((row[0], row[1], row[2]))
-                except:
-                    logger.warning(f'The following input line has not been correctly loaded: {row}')
-    return passages

@@ -4,19 +4,13 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
-import time
-import sys
 import torch
 import transformers
 import numpy as np
 from pathlib import Path
-from torch.utils.data import DataLoader, RandomSampler, DistributedSampler, SequentialSampler
+from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from src.options import Options
-
-# from torcheval.metrics.functional.text import bleu_score
 from torchtext.data.metrics import bleu_score
-from torcheval.metrics.functional.text import perplexity
-
 import src.slurm
 import src.util
 import src.evaluation
@@ -87,7 +81,6 @@ def train(model, optimizer, scheduler, step, train_dataset, eval_dataset, opt, c
                     log += f"train: {curr_loss/opt.eval_freq:.3f} |"
                     log += f"evaluation: {100*dev_em:.2f}EM |"
                     log += f"evaluation: {dev_bleu:.2f} Bleu |"
-                    # log += f"evaluation: {100*dev_perplexity:.2f} Perplexity |"
                     log += f"lr: {scheduler.get_last_lr()[0]:.5f}"
                     logger.info(log)    
                     if tb_logger is not None:
@@ -114,7 +107,6 @@ def evaluate(model, dataset, tokenizer, collator, opt):
     total = 0
     exactmatch = []
     bleu = []
-    # perplexities = []
     
     model = model.module if hasattr(model, "module") else model
     
@@ -138,13 +130,14 @@ def evaluate(model, dataset, tokenizer, collator, opt):
                 
                 gold = dataset.get_example(idx[k])['answers']
                 
-                if i*batch_size + k in example_ids:
+                if i*batch_size + k in example_ids and opt.output_examples:
                     print("ans:",ans)
                     print("gold:",gold[0])
                     print("contexts:")
                     contexts = [tokenizer.decode(c, skip_special_tokens=True) for c in context_ids[k]]
                     for c in contexts:
                         print(c)
+                    print()
                 
                 score = src.evaluation.ems(ans, gold)
                 bleu.append(bleu_score([ans.lower().split()],[[gold[0].lower().split()]]))
@@ -154,7 +147,6 @@ def evaluate(model, dataset, tokenizer, collator, opt):
 
     exactmatch, total = src.util.weighted_average(np.mean(exactmatch), total, opt)
     bleu_mean = np.mean(bleu)
-    # perplexity_mean = np.mean(perplexities)
     
     return exactmatch, bleu_mean
 
@@ -163,7 +155,6 @@ if __name__ == "__main__":
     options.add_reader_options()
     options.add_optim_options()
     opt = options.parse()
-    #opt = options.get_options(use_reader=True, use_optim=True)
 
     torch.manual_seed(opt.seed)
     src.slurm.init_distributed_mode(opt)
@@ -174,9 +165,6 @@ if __name__ == "__main__":
     if opt.is_distributed:
         torch.distributed.barrier()
     checkpoint_path.mkdir(parents=True, exist_ok=True)
-    #if not checkpoint_exists and opt.is_main:
-    #    options.print_options(opt)
-    #checkpoint_path, checkpoint_exists = util.get_checkpoint_path(opt)
 
     logger = src.util.init_logger(
         opt.is_main,
@@ -184,11 +172,10 @@ if __name__ == "__main__":
         checkpoint_path / 'run.log'
     )
 
-    model_name = 't5-' + opt.model_size
     model_class = src.model.FiDT5
 
     #load data
-    tokenizer = transformers.T5Tokenizer.from_pretrained("/home/stc/disk/tirskikh/ruT5-base", truncation_side="right")
+    tokenizer = transformers.T5Tokenizer.from_pretrained(opt.base_model_path, truncation_side="right")
     collator = src.data.Collator(opt.text_maxlength, tokenizer, answer_maxlength=opt.answer_maxlength, last_n=opt.last_n)
 
     # use golbal rank and world size to split the eval set on multiple gpus
@@ -207,7 +194,7 @@ if __name__ == "__main__":
     eval_dataset = src.data.Dataset(eval_examples, opt.n_context)
 
     if not checkpoint_exists and opt.model_path == "none":
-        t5 = transformers.T5ForConditionalGeneration.from_pretrained("/home/stc/disk/tirskikh/ruT5-base")
+        t5 = transformers.T5ForConditionalGeneration.from_pretrained(opt.base_model_path)
         model = src.model.FiDT5(t5.config)
         model.load_t5(t5.state_dict())
         model = model.to(opt.local_rank)

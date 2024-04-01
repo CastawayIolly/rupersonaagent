@@ -1,6 +1,6 @@
 # About
 
-This repository adapts the original FiD code (<https://github.com/facebookresearch/FiD>) to work for personolized dialogue generation 
+This repository adapts the original FiD code (<https://github.com/facebookresearch/FiD>) to work for personolized dialogue generation. The code was changed to fit the new task where needed. 
 
 ## Dependencies
 
@@ -56,9 +56,8 @@ all the script parameters can be viewed in the [`options.py`](src/options.py) fi
 python train_reader.py \
         --train_data train_data.json \
         --eval_data eval_data.json \
-        --model_size base \
+        --base_model_path "path to your T5 model" \
         --per_gpu_batch_size 1 \
-        --n_context 100 \
         --name my_experiment \
         --checkpoint_dir checkpoint \
 ```
@@ -71,10 +70,10 @@ You can evaluate your model or a pretrained model with [`test_reader.py`](test_r
 
 ```shell
 python test_reader.py \
+        --base_model_path
         --model_path checkpoint_dir/my_experiment/my_model_dir/checkpoint/best_dev \
         --eval_data eval_data.json \
         --per_gpu_batch_size 1 \
-        --n_context 100 \
         --name my_test \
         --checkpoint_dir checkpoint \
 ```

@@ -1,9 +1,7 @@
 import transformers
 import torch
-import numpy as np
 import src.slurm
 import src.util
-from src.options import Options
 import src.data
 import src.evaluation
 import src.model

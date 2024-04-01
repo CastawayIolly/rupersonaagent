@@ -8,7 +8,6 @@ import torch
 import transformers
 import numpy as np
 from pathlib import Path
-import torch.distributed as dist
 from torch.utils.data import DataLoader, SequentialSampler
 from torchtext.data.metrics import bleu_score
 
@@ -20,7 +19,6 @@ import src.evaluation
 import src.model
 
 def evaluate(model, dataset, dataloader, tokenizer, opt):
-    loss, curr_loss = 0.0, 0.0
     model.eval()
     if hasattr(model, "module"):
         model = model.module
@@ -104,8 +102,7 @@ if __name__ == "__main__":
         options.print_options(opt)
 
 
-    # tokenizer = transformers.T5Tokenizer.from_pretrained('t5-base', return_dict=False)
-    tokenizer = transformers.T5Tokenizer.from_pretrained("/home/stc/disk/tirskikh/ruT5-base", truncation_side="right")
+    tokenizer = transformers.T5Tokenizer.from_pretrained(opt.base_model_path, truncation_side="right")
 
     collator_function = src.data.Collator(opt.text_maxlength, tokenizer, answer_maxlength=opt.answer_maxlength, last_n=opt.last_n)
     eval_examples = src.data.load_data(
