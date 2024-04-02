@@ -79,8 +79,6 @@ def init_distributed_mode(params):
             ['scontrol', 'show', 'hostnames', os.environ['SLURM_JOB_NODELIST']])
         params.main_addr = hostnames.split()[0].decode('utf-8')
         assert 10001 <= params.main_port <= 20000 or params.world_size == 1
-        # print(PREFIX + "Master address: %s" % params.master_addr)
-        # print(PREFIX + "Master port   : %i" % params.master_port)
 
         # set environment variables for 'env://'
         os.environ['MASTER_ADDR'] = params.main_addr
@@ -120,9 +118,6 @@ def init_distributed_mode(params):
     params.multi_node = params.n_nodes > 1
     params.multi_gpu = params.world_size > 1
 
-    # summary
-    PREFIX = "%i - " % params.global_rank
-
     # set GPU device
     if params.is_distributed:
         torch.cuda.set_device(params.local_rank)
@@ -142,7 +137,6 @@ def init_distributed_mode(params):
         # RANK - required; can be set either here, or in a call to init
         # function
 
-        # print("Initializing PyTorch distributed ...")
         torch.distributed.init_process_group(
             init_method='env://',
             backend='nccl',
