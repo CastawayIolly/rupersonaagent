@@ -75,14 +75,6 @@ def init_distributed_mode(params):
             'SLURM_LOCALID',
             'SLURM_TASK_PID']
 
-        PREFIX = "%i - " % int(os.environ['SLURM_PROCID'])
-        for name in SLURM_VARIABLES:
-            value = os.environ.get(name, None)
-            # print(PREFIX + "%s: %s" % (name, str(value)))
-
-        # # job ID
-        # params.job_id = os.environ['SLURM_JOB_ID']
-
         # number of nodes / node ID
         params.n_nodes = int(os.environ['SLURM_JOB_NUM_NODES'])
         params.node_id = int(os.environ['SLURM_NODEID'])

@@ -122,8 +122,7 @@ class WarmupLinearScheduler(torch.optim.lr_scheduler.LambdaLR):
         if self.fixed_lr:
             return 1.0
 
-        return max(0.0, 1.0 + (self.min_ratio - 1) * (step - self.warmup_steps) /
-                   float(max(1.0, self.scheduler_steps - self.warmup_steps)), )
+        return max(0.0, 1.0 + (self.min_ratio - 1) * (step - self.warmup_steps) / float(max(1.0, self.scheduler_steps - self.warmup_steps)), )
 
 
 class FixedScheduler(torch.optim.lr_scheduler.LambdaLR):
@@ -216,7 +215,6 @@ def save_distributed_dataset(data, opt):
     if opt.is_main:
         final_path = dir_path / 'dataset_wscores.json'
         logger.info(f'Writing dataset with scores at {final_path}')
-        glob_path = write_path / '*'
         results_path = write_path.glob('*.json')
         alldata = []
         for path in results_path:

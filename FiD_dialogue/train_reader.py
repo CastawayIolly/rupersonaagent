@@ -50,7 +50,7 @@ def train(
         collate_fn=collator
     )
 
-    loss, curr_loss = 0.0, 0.0
+    curr_loss = 0.0, 0.0
     epoch = 1
     model.train()
     while step < opt.total_steps:
@@ -136,9 +136,7 @@ def evaluate(model, dataset, tokenizer, collator, opt):
     batch_size = opt.per_gpu_batch_size
 
     example_ids = np.random.choice(
-        np.arange(
-            num_batches *
-            batch_size),
+        np.arange(num_batches * batch_size),
         10,
         replace=False)
 
