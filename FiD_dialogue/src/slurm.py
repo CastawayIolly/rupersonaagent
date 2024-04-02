@@ -62,19 +62,6 @@ def init_distributed_mode(params):
 
         assert params.local_rank == -1   # on the cluster, this is handled by SLURM
 
-        SLURM_VARIABLES = [
-            'SLURM_JOB_ID',
-            'SLURM_JOB_NODELIST',
-            'SLURM_JOB_NUM_NODES',
-            'SLURM_NTASKS',
-            'SLURM_TASKS_PER_NODE',
-            'SLURM_MEM_PER_NODE',
-            'SLURM_MEM_PER_CPU',
-            'SLURM_NODEID',
-            'SLURM_PROCID',
-            'SLURM_LOCALID',
-            'SLURM_TASK_PID']
-
         # number of nodes / node ID
         params.n_nodes = int(os.environ['SLURM_JOB_NUM_NODES'])
         params.node_id = int(os.environ['SLURM_NODEID'])
