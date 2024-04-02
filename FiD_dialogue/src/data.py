@@ -8,6 +8,7 @@ import torch
 import random
 import json
 
+
 class Dataset(torch.utils.data.Dataset):
     def __init__(self,
                  data,
@@ -50,23 +51,23 @@ class Dataset(torch.utils.data.Dataset):
         else:
             passages, scores = None, None
 
-
         return {
-            'index' : index,
-            'question' : question,
-            'target' : target,
-            'passages' : passages,
-            'scores' : scores
+            'index': index,
+            'question': question,
+            'target': target,
+            'passages': passages,
+            'scores': scores
         }
 
     def sort_data(self):
-        if self.n_context is None or not 'score' in self.data[0]['ctxs'][0]:
+        if self.n_context is None or 'score' not in self.data[0]['ctxs'][0]:
             return
         for ex in self.data:
             ex['ctxs'].sort(key=lambda x: float(x['score']), reverse=True)
 
     def get_example(self, index):
         return self.data[index]
+
 
 def encode_passages(batch_text_passages, tokenizer, max_length):
     passage_ids, passage_masks = [], []
@@ -85,15 +86,21 @@ def encode_passages(batch_text_passages, tokenizer, max_length):
     passage_masks = torch.cat(passage_masks, dim=0)
     return passage_ids, passage_masks.bool()
 
+
 class Collator(object):
-    def __init__(self, text_maxlength, tokenizer, answer_maxlength=20, last_n = 5):
+    def __init__(
+            self,
+            text_maxlength,
+            tokenizer,
+            answer_maxlength=20,
+            last_n=5):
         self.tokenizer = tokenizer
         self.text_maxlength = text_maxlength
         self.answer_maxlength = answer_maxlength
         self.last_n = 5
 
     def __call__(self, batch):
-        assert(batch[0]['target'] != None)
+        assert (batch[0]['target'] is not None)
         index = torch.tensor([ex['index'] for ex in batch])
         target = [ex['target'] for ex in batch]
         target = self.tokenizer.batch_encode_plus(
@@ -110,18 +117,20 @@ class Collator(object):
         def append_question(example):
             if example['passages'] is None:
                 return [example['question']]
-            
+
             last_n = self.last_n
-            
+
             results = []
             for t in example['passages']:
                 splits = t.split("Пользователь")
-                if len(splits)>last_n:
-                    result = example['question'] + " " + (splits[0] + "Пользователь" + "\n\nПользователь".join(splits[-last_n:]))
+                if len(splits) > last_n:
+                    result = example['question'] + " " + (
+                        splits[0] + "Пользователь" + "\n\nПользователь".join(splits[-last_n:]))
                 else:
-                    result = example['question'] + " " + "\n\nПользователь".join(splits)
+                    result = example['question'] + " " + \
+                        "\n\nПользователь".join(splits)
                 results.append(result)
-            
+
             return results
         text_passages = [append_question(example) for example in batch]
         passage_ids, passage_masks = encode_passages(text_passages,
@@ -129,6 +138,7 @@ class Collator(object):
                                                      self.text_maxlength)
 
         return (index, target_ids, target_mask, passage_ids, passage_masks)
+
 
 def load_data(data_path=None, global_rank=-1, world_size=-1):
     assert data_path
@@ -139,14 +149,14 @@ def load_data(data_path=None, global_rank=-1, world_size=-1):
             data = json.load(fin)
     examples = []
     for k, example in enumerate(data):
-        if global_rank > -1 and not k%world_size==global_rank:
+        if global_rank > -1 and not k % world_size == global_rank:
             continue
         if data_path is not None and data_path.endswith('.jsonl'):
             example = json.loads(example)
-        if not 'id' in example:
+        if 'id' not in example:
             example['id'] = k
         for c in example['ctxs']:
-            if not 'score' in c:
+            if 'score' not in c:
                 c['score'] = 1.0 / (k + 1)
         examples.append(example)
     if data_path is not None and data_path.endswith('.jsonl'):

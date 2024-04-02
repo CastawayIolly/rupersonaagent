@@ -18,16 +18,28 @@ import src.data
 import src.model
 
 
-def train(model, optimizer, scheduler, step, train_dataset, eval_dataset, opt, collator, best_dev_em, checkpoint_path):
+def train(
+        model,
+        optimizer,
+        scheduler,
+        step,
+        train_dataset,
+        eval_dataset,
+        opt,
+        collator,
+        best_dev_em,
+        checkpoint_path):
 
     if opt.is_main:
         try:
-            tb_logger = torch.utils.tensorboard.SummaryWriter(Path(opt.checkpoint_dir)/opt.name)
-        except:
+            tb_logger = torch.utils.tensorboard.SummaryWriter(
+                Path(opt.checkpoint_dir) / opt.name)
+        except BaseException:
             tb_logger = None
             logger.warning('Tensorboard is not available.')
 
-    torch.manual_seed(opt.global_rank + opt.seed) #different seed for different sampling depending on global_rank
+    # different seed for different sampling depending on global_rank
+    torch.manual_seed(opt.global_rank + opt.seed)
     train_sampler = RandomSampler(train_dataset)
     train_dataloader = DataLoader(
         train_dataset,
@@ -43,11 +55,11 @@ def train(model, optimizer, scheduler, step, train_dataset, eval_dataset, opt, c
     model.train()
     while step < opt.total_steps:
         epoch += 1
-        
+
         for i, batch in enumerate(train_dataloader):
             if step % 100 == 0:
                 logger.info(f"Step: {step}")
-                
+
             step += 1
             (idx, labels, _, context_ids, context_mask) = batch
 
@@ -70,51 +82,66 @@ def train(model, optimizer, scheduler, step, train_dataset, eval_dataset, opt, c
 
             if step % opt.eval_freq == 0:
                 logger.info("Eval start")
-                dev_em,dev_bleu = evaluate(model, eval_dataset, tokenizer, collator, opt)
+                dev_em, dev_bleu = evaluate(
+                    model, eval_dataset, tokenizer, collator, opt)
                 model.train()
                 if opt.is_main:
                     if dev_em > best_dev_em:
                         best_dev_em = dev_em
-                        src.util.save(model, optimizer, scheduler, step, best_dev_em,
-                                  opt, checkpoint_path, 'best_dev')
+                        src.util.save(
+                            model,
+                            optimizer,
+                            scheduler,
+                            step,
+                            best_dev_em,
+                            opt,
+                            checkpoint_path,
+                            'best_dev')
                     log = f"{step} / {opt.total_steps} |"
                     log += f"train: {curr_loss/opt.eval_freq:.3f} |"
                     log += f"evaluation: {100*dev_em:.2f}EM |"
                     log += f"evaluation: {dev_bleu:.2f} Bleu |"
                     log += f"lr: {scheduler.get_last_lr()[0]:.5f}"
-                    logger.info(log)    
+                    logger.info(log)
                     if tb_logger is not None:
                         tb_logger.add_scalar("Evaluation", dev_em, step)
-                        tb_logger.add_scalar("Training", curr_loss / (opt.eval_freq), step)
+                        tb_logger.add_scalar(
+                            "Training", curr_loss / (opt.eval_freq), step)
                     curr_loss = 0.
 
             if opt.is_main and step % opt.save_freq == 0:
                 src.util.save(model, optimizer, scheduler, step, best_dev_em,
-                          opt, checkpoint_path, f"step-{step}")
+                              opt, checkpoint_path, f"step-{step}")
             if step > opt.total_steps:
                 break
+
 
 def evaluate(model, dataset, tokenizer, collator, opt):
     sampler = SequentialSampler(dataset)
     dataloader = DataLoader(dataset,
-        sampler=sampler,
-        batch_size=opt.per_gpu_batch_size,
-        drop_last=False,
-        num_workers=10,
-        collate_fn=collator
-    )
+                            sampler=sampler,
+                            batch_size=opt.per_gpu_batch_size,
+                            drop_last=False,
+                            num_workers=10,
+                            collate_fn=collator
+                            )
     model.eval()
     total = 0
     exactmatch = []
     bleu = []
-    
+
     model = model.module if hasattr(model, "module") else model
-    
+
     num_batches = len(dataloader)
     batch_size = opt.per_gpu_batch_size
-    
-    example_ids = np.random.choice(np.arange(num_batches*batch_size),10,replace = False)
-    
+
+    example_ids = np.random.choice(
+        np.arange(
+            num_batches *
+            batch_size),
+        10,
+        replace=False)
+
     with torch.no_grad():
         for i, batch in enumerate(dataloader):
             (idx, target_ids, target_mask, context_ids, context_mask) = batch
@@ -127,28 +154,33 @@ def evaluate(model, dataset, tokenizer, collator, opt):
 
             for k, o in enumerate(outputs):
                 ans = tokenizer.decode(o, skip_special_tokens=True)
-                
+
                 gold = dataset.get_example(idx[k])['answers']
-                
-                if i*batch_size + k in example_ids and opt.output_examples:
-                    print("ans:",ans)
-                    print("gold:",gold[0])
+
+                if i * batch_size + k in example_ids and opt.output_examples:
+                    print("ans:", ans)
+                    print("gold:", gold[0])
                     print("contexts:")
-                    contexts = [tokenizer.decode(c, skip_special_tokens=True) for c in context_ids[k]]
+                    contexts = [
+                        tokenizer.decode(
+                            c, skip_special_tokens=True) for c in context_ids[k]]
                     for c in contexts:
                         print(c)
                     print()
-                
+
                 score = src.evaluation.ems(ans, gold)
-                bleu.append(bleu_score([ans.lower().split()],[[gold[0].lower().split()]]))
-                
+                bleu.append(bleu_score([ans.lower().split()], [
+                            [gold[0].lower().split()]]))
+
                 total += 1
                 exactmatch.append(score)
 
-    exactmatch, total = src.util.weighted_average(np.mean(exactmatch), total, opt)
+    exactmatch, total = src.util.weighted_average(
+        np.mean(exactmatch), total, opt)
     bleu_mean = np.mean(bleu)
-    
+
     return exactmatch, bleu_mean
+
 
 if __name__ == "__main__":
     options = Options()
@@ -160,7 +192,7 @@ if __name__ == "__main__":
     src.slurm.init_distributed_mode(opt)
     src.slurm.init_signal_handler()
 
-    checkpoint_path = Path(opt.checkpoint_dir)/opt.name
+    checkpoint_path = Path(opt.checkpoint_dir) / opt.name
     checkpoint_exists = checkpoint_path.exists()
     if opt.is_distributed:
         torch.distributed.barrier()
@@ -174,14 +206,19 @@ if __name__ == "__main__":
 
     model_class = src.model.FiDT5
 
-    #load data
-    tokenizer = transformers.T5Tokenizer.from_pretrained(opt.base_model_path, truncation_side="right")
-    collator = src.data.Collator(opt.text_maxlength, tokenizer, answer_maxlength=opt.answer_maxlength, last_n=opt.last_n)
+    # load data
+    tokenizer = transformers.T5Tokenizer.from_pretrained(
+        opt.base_model_path, truncation_side="right")
+    collator = src.data.Collator(
+        opt.text_maxlength,
+        tokenizer,
+        answer_maxlength=opt.answer_maxlength,
+        last_n=opt.last_n)
 
     # use golbal rank and world size to split the eval set on multiple gpus
     train_examples = src.data.load_data(
-        opt.train_data, 
-        global_rank=opt.global_rank, 
+        opt.train_data,
+        global_rank=opt.global_rank,
         world_size=opt.world_size,
     )
     train_dataset = src.data.Dataset(train_examples, opt.n_context)
@@ -194,7 +231,8 @@ if __name__ == "__main__":
     eval_dataset = src.data.Dataset(eval_examples, opt.n_context)
 
     if not checkpoint_exists and opt.model_path == "none":
-        t5 = transformers.T5ForConditionalGeneration.from_pretrained(opt.base_model_path)
+        t5 = transformers.T5ForConditionalGeneration.from_pretrained(
+            opt.base_model_path)
         model = src.model.FiDT5(t5.config)
         model.load_t5(t5.state_dict())
         model = model.to(opt.local_rank)
