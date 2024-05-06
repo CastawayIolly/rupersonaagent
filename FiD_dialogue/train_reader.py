@@ -1,8 +1,11 @@
+# This source code has been adapted from original FiD implementation by
 # Copyright (c) Facebook, Inc. and its affiliates.
 # All rights reserved.
-#
-# This source code is licensed under the license found in the
-# LICENSE file in the root directory of this source tree.
+# The original repository: https://github.com/facebookresearch/FiD
+# The original code is licensed by Attribution-NonCommercial 4.0 International (https://creativecommons.org/licenses/by-nc/4.0/)
+# This code has been modified to allow for dialogue agents training
+# The source code found in this part of the repository is licensed accordingly
+# The text of the license can be found in the LICENSE file at the root of this directory
 
 import torch
 import transformers
@@ -50,7 +53,7 @@ def train(
         collate_fn=collator
     )
 
-    curr_loss = 0.0, 0.0
+    curr_loss = 0.0
     epoch = 1
     model.train()
     while step < opt.total_steps:
@@ -158,12 +161,12 @@ def evaluate(model, dataset, tokenizer, collator, opt):
                 if i * batch_size + k in example_ids and opt.output_examples:
                     print("ans:", ans)
                     print("gold:", gold[0])
-                    print("contexts:")
-                    contexts = [
-                        tokenizer.decode(
-                            c, skip_special_tokens=True) for c in context_ids[k]]
-                    for c in contexts:
-                        print(c)
+                    # print("contexts:")
+                    # contexts = [
+                    #     tokenizer.decode(
+                    #         c, skip_special_tokens=True) for c in context_ids[k]]
+                    # for c in contexts:
+                    #     print(c)
                     print()
 
                 score = src.evaluation.ems(ans, gold)

@@ -1,8 +1,11 @@
+# This source code has been adapted from original FiD implementation by
 # Copyright (c) Facebook, Inc. and its affiliates.
 # All rights reserved.
-#
-# This source code is licensed under the license found in the
-# LICENSE file in the root directory of this source tree.
+# The original repository: https://github.com/facebookresearch/FiD
+# The original code is licensed by Attribution-NonCommercial 4.0 International (https://creativecommons.org/licenses/by-nc/4.0/)
+# This code has been modified to allow for dialogue agents training
+# The source code found in this part of the repository is licensed accordingly
+# The text of the license can be found in the LICENSE file at the root of this directory
 
 from logging import getLogger
 import os
