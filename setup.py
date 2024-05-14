@@ -118,10 +118,12 @@ setup(
         'scipy==1.10.1',
         'pyhamcrest==2.0.4'
     ],
-    packages=find_packages(include=['generative_model', 'speech_extraction',
-                                    'inference_optimization', 'internet_memory_model',
-                                    'knowledge_distillation', 'personification',
-                                    'rule_based_information_extraction',
-                                    'tests', 'datasets'])
+    packages=find_packages(include=[
+        'generative_model', 'speech_extraction',
+        'inference_optimization', 'internet_memory_model',
+        'knowledge_distillation', 'personification',
+        'rule_based_information_extraction',
+        'tests', 'datasets'
+    ])
 
 )
