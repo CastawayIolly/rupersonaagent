@@ -11,10 +11,12 @@ alp = list("qwertyuiopasdfghjklzxcvbnm")
 # get current and next lexeme
 def get_lexeme(lex_dep, lex_dep2):
     word, word_next = lex_dep[0], lex_dep2[0]
-    word = [letter for letter in word if letter.isalpha() and letter not in alp]
+    word = [letter for letter in word
+            if letter.isalpha() and letter not in alp]
     word = "".join(word)
     word_next = [
-        letter for letter in word_next if letter.isalpha() and letter not in alp
+        letter for letter in word_next
+        if letter.isalpha() and letter not in alp
     ]
     word_next = "".join(word_next)
 

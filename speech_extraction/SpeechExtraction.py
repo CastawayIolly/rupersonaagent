@@ -1,5 +1,8 @@
 import pandas as pd
-from speech_extraction.SpeechCharacteristic import SpeechCharacteristic, characteristics
+from speech_extraction.SpeechCharacteristic import (
+    SpeechCharacteristic,
+    characteristics
+)
 import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 from statistics import mean
@@ -12,7 +15,11 @@ import scipy.stats as stats
 nltk.download('punkt')
 
 
-def read_dataset(dataset_name: str, path: str, column_name: str, delimiter: str):
+def read_dataset(
+        dataset_name: str,
+        path: str,
+        column_name: str,
+        delimiter: str):
     df = pd.read_csv(path, delimiter=delimiter)
     return df[column_name], dataset_name
 
@@ -30,10 +37,23 @@ def get_sentence_and_words(dataset):
             words_count = len(word_tokenize(sent))
             words.append(words_count)
             letter_count = len(
-                list(filter(functools.partial(operator.contains, letters), sent))
+                list(
+                    filter(functools.partial(
+                        operator.contains,
+                        letters),
+                        sent)
+                )
             )
             punctuation_count = len(
-                list(filter(functools.partial(operator.contains, punctuation), sent))
+                list(
+                    filter(
+                        functools.partial(
+                            operator.contains,
+                            punctuation
+                        ),
+                        sent
+                    )
+                )
             )
             letters_in_words.append(letter_count / words_count)
             punctuations.append(punctuation_count)
@@ -57,7 +77,8 @@ def get_pos_tags(dataset, size):
 
 def get_speech_characteristic(dataset, dataset_name: str):
     speech = SpeechCharacteristic(dataset_name=dataset_name)
-    sentences, words, letters, punctuation, size = get_sentence_and_words(dataset)
+    (sentences, words, letters,
+     punctuation, size) = get_sentence_and_words(dataset)
     speech.sentences_in_speech = sentences
     speech.words_in_phrase = words
     speech.letter_in_words = letters
@@ -74,7 +95,12 @@ def get_speech_characteristic(dataset, dataset_name: str):
 def get_info_from_dataset(
     dataset_name: str, path: str, column_name: str, delimiter: str
 ):
-    dataset, dataset_name = read_dataset(dataset_name, path, column_name, delimiter)
+    dataset, dataset_name = read_dataset(
+        dataset_name,
+        path,
+        column_name,
+        delimiter
+    )
     speech_characteristic = get_speech_characteristic(dataset, dataset_name)
     return speech_characteristic
 

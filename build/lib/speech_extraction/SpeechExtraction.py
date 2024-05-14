@@ -1,5 +1,7 @@
 import pandas as pd
-from speech_extraction.SpeechCharacteristic import SpeechCharacteristic, characteristics
+from speech_extraction.SpeechCharacteristic import (
+    SpeechCharacteristic, characteristics
+)
 import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 from statistics import mean
@@ -12,7 +14,12 @@ import scipy.stats as stats
 nltk.download('punkt')
 
 
-def read_dataset(dataset_name: str, path: str, column_name: str, delimiter: str):
+def read_dataset(
+        dataset_name: str,
+        path: str,
+        column_name: str,
+        delimiter: str
+):
     df = pd.read_csv(path, delimiter=delimiter)
     return df[column_name], dataset_name
 

@@ -50,8 +50,10 @@ class TestGenerativeModel:
     def testdatamodule(self):
         train = self.datamodule.train_dataloader()
         assert_that(len(train), equal_to(2231))
-        assert_that(train.column_names, equal_to(['current_gk', 'task', 'next_answer']))
-        assert_that(list(train[0].keys()), equal_to(['current_gk', 'task', 'next_answer']))
+        assert_that(train.column_names,
+                    equal_to(['current_gk', 'task', 'next_answer']))
+        assert_that(list(train[0].keys()),
+                    equal_to(['current_gk', 'task', 'next_answer']))
 
     def test_embeddings_size(self):
         inp = self.tokenizer(['тест'], return_tensors='pt')
