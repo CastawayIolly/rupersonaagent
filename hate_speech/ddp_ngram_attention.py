@@ -3,13 +3,15 @@ import pandas as pd
 from sklearn.metrics import f1_score, accuracy_score
 import transformers
 from torch import nn
-from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampler
+from torch.utils.data import TensorDataset, Dataset, DataLoader, RandomSampler, SequentialSampler
 from transformers import BertTokenizer, BertModel, BertConfig
 from torch import cuda
 from tqdm import tqdm
 import torch
 import fasttext
 import nltk
+from torchsummary import summary
+import pickle
 
 import torch
 import torch.nn.functional as F
@@ -23,12 +25,13 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed import init_process_group, destroy_process_group
 import os
 
+# config section 
 
 MAX_LEN = 75
-TRAIN_BATCH_SIZE = 8
-VALID_BATCH_SIZE = 8
-EPOCHS = 10
-LEARNING_RATE = 0.001
+TRAIN_BATCH_SIZE = 10
+VALID_BATCH_SIZE = 10
+EPOCHS = 5
+LEARNING_RATE = 0.0001
 tokenizer = None
 EMBED_LEN = 300
 
@@ -53,6 +56,7 @@ class Trainer:
         train_data: DataLoader,
         test_data: DataLoader, 
         optimizer: torch.optim.Optimizer,
+        scheduler, 
         gpu_id: int,
         save_every: int,
     ) -> None:
@@ -61,74 +65,49 @@ class Trainer:
         self.train_data = train_data
         self.test_data = test_data
         self.optimizer = optimizer
+        self.scheduler = scheduler
         self.save_every = save_every
-        self.model = DDP(model, device_ids=[gpu_id])
+        self.model = DDP(model, device_ids=[gpu_id], find_unused_parameters=True)
     
     def loss_fn(self, outputs, targets):
+        #return torch.nn.CrossEntropyLoss(weight=torch.tensor([0.3, 0.7], dtype=torch.float).to(self.gpu_id))(outputs, targets)
         return torch.nn.CrossEntropyLoss()(outputs, targets)
-
-
+  
     def _run_epoch(self, epoch):
         self.train_data.sampler.set_epoch(epoch)
         
         for _,data in enumerate(tqdm(self.train_data), 0):
-            sentences = data['lem_words']
-            sentences = list(zip(*[list(x) for x in sentences]))
-            targets = torch.tensor([[1,0] if tar==0 else [0,1] for tar in data['targets']], device=self.gpu_id, dtype=torch.float)
-            #print(targets)
-            embs = torch.empty((len(sentences), MAX_LEN, EMBED_LEN)).to(self.gpu_id, dtype = torch.float)
+            sentences = data[0]
+            targets_ = data[1]
+            targets = torch.empty((len(data[1]), 2), dtype=torch.float)
+            for i, tar in enumerate(targets_):
+                if tar == 0:
+                    targets[i] = torch.tensor([1.,0.])
+                else:
+                    targets[i] = torch.tensor([0.,1.])
+
             for idx, sentence in enumerate(sentences): 
-                s_embs =torch.empty((MAX_LEN, EMBED_LEN)).to(self.gpu_id, dtype = torch.float)
                 for i, word in enumerate(sentence):
-                    if word != '<EOS>':
-                       s_embs[i] = torch.from_numpy(ft.get_word_vector(word))
-                    else:
-                       s_embs[i] = self.train_data.dataset.eof   
-                embs[idx] = s_embs    
-            embs = torch.unsqueeze(embs, 1)
-            outputs = self.model(embs)
+                    # if emb is pure zeros, then it is altered into trainable eos embedding
+                    if torch.all(word.eq(torch.zeros_like(word))):
+                        with torch.no_grad():
+                            sentences[idx][i] = self.model.module.eos    
+            sentences = torch.unsqueeze(sentences, 1)    
             
-            self.optimizer.zero_grad()
-            loss = self.loss_fn(outputs, targets)
-            if _%50==0:
-                print(f'Epoch: {epoch}, Loss:  {loss.item()}')
-            
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
-    
-    def run_test(self,):
-        results = [] #torch.empty((len(test_dataset)))
-        ans = [] #torch.empty((len(test_dataset)))
-        with torch.no_grad():
-            for _,data in enumerate(tqdm(self.test_data), 0):
-                sentences = data['lem_words']
-                sentences = list(zip(*[list(x) for x in sentences]))
-                targets = torch.tensor([[1,0] if tar==0 else [0,1] for tar in data['targets']], device=self.gpu_id, dtype=torch.float)
-                print(targets)
-                embs = torch.empty((len(sentences), MAX_LEN, EMBED_LEN)).to(self.gpu_id, dtype = torch.float)
-                for idx, sentence in enumerate(sentences): 
-                    #print(sentence)
-                    s_embs =torch.empty((MAX_LEN, EMBED_LEN)).to(self.gpu_id, dtype = torch.float)
-                    for i, word in enumerate(sentence):
-                        if word != '<EOS>':
-                            s_embs[i] = torch.from_numpy(ft.get_word_vector(word))
-                        else:
-                            s_embs[i] = self.train_data.dataset.eof   
-                    embs[idx] = s_embs    
-                embs = torch.unsqueeze(embs, 1)
-                outputs = self.model(embs)
-                outputs = outputs.squeeze()
-                #print(outputs)    
+            with torch.enable_grad():
+                outputs = self.model(sentences.to(self.gpu_id, dtype=torch.float))
+                #outputs = outputs.reshape(TRAIN_BATCH_SIZE)
+
+                self.optimizer.zero_grad()
+                loss = self.loss_fn(outputs, targets.to(self.gpu_id, dtype=torch.float))
+                if _%50==0:
+                    print(f'Epoch: {epoch}, Loss:  {loss.item()}')
                 
-                results += outputs
-                ans += targets
-        results = np.array([r.cpu().numpy() for r in results])
-        results = [(1 if result[1] == 1 else 0) for result in results]
-        ans = np.array([r.cpu().numpy() for r in ans])
-        f1 = f1_score(results, ans, average='weighted')
-        acc = accuracy_score(results, ans)
-        print(f'len test: {len(results)}\n F1: {f1}\n Accuracy: {acc}\n')            
+                loss.backward()
+                self.optimizer.step()
+        self.scheduler.step()
+        print("Current LR:", self.scheduler.get_last_lr())
+                          
     
     def _save_checkpoint(self, epoch):
         ckp = self.model.module.state_dict()
@@ -156,12 +135,27 @@ def load_train_objs():
     print("TRAIN Dataset: {}".format(train_dataset.shape))
     print("TEST Dataset: {}".format(test_dataset.shape))
 
-    train_set = CustomDataset(train_dataset, tokenizer, MAX_LEN)
-    test_set = CustomDataset(test_dataset, tokenizer, MAX_LEN)
+    if not os.path.isfile('fasttext_train.pkl'):
+        training_set = CustomDataset(train_dataset, tokenizer, MAX_LEN, 'train')
+        training_set.save_ft_feats()
+    else: 
+        with open('fasttext_train.pkl', 'rb') as fp:
+            training_set = pickle.load(fp)        
+    training_set = TensorDataset(training_set[0], training_set[1])        
+    
+    if not os.path.isfile('fasttext_test.pkl'):
+        testing_set = CustomDataset(test_dataset, tokenizer, MAX_LEN, 'test')
+        testing_set.save_ft_feats()
+    else:
+        with open('fasttext_test.pkl', 'rb') as fp:
+            testing_set = pickle.load(fp) 
+    testing_set = TensorDataset(testing_set[0], testing_set[1]) 
 
     model = NGramAttention()
+    
     optimizer = torch.optim.Adam(params =  model.parameters(), lr=LEARNING_RATE)
-    return train_set, test_set, model, optimizer
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.8)
+    return training_set, testing_set, model, optimizer, scheduler 
 
 
 def prepare_dataloader(train_dataset: Dataset, test_dataset: Dataset, batch_size: int):
@@ -184,11 +178,11 @@ def prepare_dataloader(train_dataset: Dataset, test_dataset: Dataset, batch_size
 
 def main(rank: int, world_size: int, save_every: int, total_epochs: int, batch_size: int):
     ddp_setup(rank, world_size)
-    train_dataset, test_dataset, model, optimizer = load_train_objs()
+    train_dataset, test_dataset, model, optimizer, scheduler = load_train_objs()
     train_data, test_data = prepare_dataloader(train_dataset, test_dataset, batch_size)
-    trainer = Trainer(model, train_data, test_data, optimizer, rank, save_every)
-    #trainer.train(total_epochs)
-    trainer.run_test()
+    trainer = Trainer(model, train_data, test_data, optimizer, scheduler, rank, save_every)
+    trainer.train(total_epochs)
+    #trainer.run_test()
     destroy_process_group()
 
 

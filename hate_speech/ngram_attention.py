@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn import metrics
 import transformers
 from torch import nn
-from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampler
+from torch.utils.data import TensorDataset, Dataset, DataLoader, RandomSampler, SequentialSampler
 from transformers import BertTokenizer, BertModel, BertConfig
 from torch import cuda
 from tqdm import tqdm
@@ -16,15 +16,18 @@ from torch.utils.data.distributed import DistributedSampler
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed import init_process_group, destroy_process_group
 from sklearn.metrics import f1_score, accuracy_score
+import os.path
+import pickle
 
+# config section 
 MAX_LEN = 75
-TRAIN_BATCH_SIZE = 4
-VALID_BATCH_SIZE = 4
-EPOCHS = 1
-LEARNING_RATE = 0.001
+TRAIN_BATCH_SIZE = 10
+VALID_BATCH_SIZE = 10
+EPOCHS = 5
+LEARNING_RATE = 0.0001
 tokenizer = None
 EMBED_LEN = 300
-MODE = 'check'
+MODE = 'train'
 
 fasttext.util.download_model('ru', if_exists='ignore') 
 ft = fasttext.load_model('cc.ru.300.bin')
@@ -86,6 +89,7 @@ class NGramAttention(nn.Module):
                                         self.dropout,
                                         self.dense2)  
         self.softmax = nn.Softmax(dim=1)
+        self.eos = nn.Parameter(torch.randn(300), requires_grad=True)
 
     def forward(self, inputs):
         x1, _ = self.block1(inputs)
@@ -107,7 +111,7 @@ class NGramAttention(nn.Module):
         #print(x)
         out = self.final_block(x.transpose(0,1))
         #print(f'out: {out.shape}')
-        return self.softmax(out)
+        return out #self.softmax(out)
     
 
 def main():
@@ -126,9 +130,22 @@ def main():
     print("TRAIN Dataset: {}".format(train_dataset.shape))
     print("TEST Dataset: {}".format(test_dataset.shape))
 
-    training_set = CustomDataset(train_dataset, tokenizer, MAX_LEN)
-    testing_set = CustomDataset(test_dataset, tokenizer, MAX_LEN)
+    if not os.path.isfile('fasttext_train.pkl'):
+        training_set = CustomDataset(train_dataset, tokenizer, MAX_LEN, 'train')
+        training_set.save_ft_feats()
+    else: 
+        with open('fasttext_train.pkl', 'rb') as fp:
+            training_set = pickle.load(fp) 
+    training_set = TensorDataset(training_set[0], training_set[1])        
     
+    if not os.path.isfile('fasttext_test.pkl'):
+        testing_set = CustomDataset(test_dataset, tokenizer, MAX_LEN, 'test')
+        testing_set.save_ft_feats()
+    else:
+        with open('fasttext_test.pkl', 'rb') as fp:
+            testing_set = pickle.load(fp)       
+    testing_set = TensorDataset(testing_set[0], testing_set[1]) 
+
     train_params = {'batch_size': TRAIN_BATCH_SIZE,
                 'shuffle': True,
                 'drop_last': True,
@@ -149,108 +166,123 @@ def main():
 
 
     def loss_fn(outputs, targets):
-        return torch.nn.CrossEntropyLoss()(outputs, targets)
+        return torch.nn.CrossEntropyLoss(torch.tensor([0.4, 0.6], dtype=torch.float).to(device='cuda'))(outputs, targets)
     
     optimizer = torch.optim.Adam(params =  model.parameters(), lr=LEARNING_RATE)
-
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.8)
     
     def train(epoch):
         model.train()
-        for _,data in enumerate(tqdm(training_loader), 0):
+        for index ,data in enumerate(tqdm(training_loader), 0):
             # preprocessing
-            sentences = data['lem_words']
-            sentences = list(zip(*[list(x) for x in sentences]))
-            targets = data['targets'].to(device, dtype = torch.float)
-            embs = torch.empty((len(sentences), MAX_LEN, EMBED_LEN)).to(device, dtype = torch.float)
-            for idx, sentence in enumerate(sentences): 
-                s_embs =torch.empty((MAX_LEN, EMBED_LEN)).to(device, dtype = torch.float)
-                for i, word in enumerate(sentence):
-                    if word != '<EOS>':
-                       s_embs[i] = torch.from_numpy(ft.get_word_vector(word))
-                    else:
-                       s_embs[i] = training_set.eof   
-                embs[idx] = s_embs    
-            embs = torch.unsqueeze(embs, 1)
-            
-            outputs = model(embs)
-            outputs = outputs.reshape(TRAIN_BATCH_SIZE)
+            sentences = data[0]
+            targets_ = data[1]#.to(device, dtype = torch.float)
+            targets = torch.empty((len(data[1]), 2), dtype=torch.float)
+            for i, tar in enumerate(targets_):
+                if tar == 0:
+                    targets[i] = torch.tensor([1.,0.])
+                else:
+                    targets[i] = torch.tensor([0.,1.])
 
-            optimizer.zero_grad()
-            loss = loss_fn(outputs, targets)
-            if _%50==0:
-                print(f'Epoch: {epoch}, Loss:  {loss.item()}')
+            for idx, sentence in enumerate(sentences): 
+                for i, word in enumerate(sentence):
+                    # if emb is pure zeros, then it is altered into trainable eos embedding
+                    if torch.all(word.eq(torch.zeros_like(word))):
+                        with torch.no_grad():
+                            sentences[idx][i] = model.eos    
+            sentences = torch.unsqueeze(sentences, 1)    
             
-            loss.backward()
-            optimizer.step()
+            with torch.enable_grad():
+                outputs = model(sentences.to(device, dtype=torch.float))
+                #outputs = outputs.reshape(TRAIN_BATCH_SIZE)
+
+                optimizer.zero_grad()
+                loss = loss_fn(outputs, targets.to(device, dtype=torch.float))
+                if index %50 ==0:
+                    print(f'Epoch: {epoch}, Loss:  {loss.item()}')
+                
+                loss.backward()
+                optimizer.step()
+        scheduler.step()  
+        print("Current LR: ", scheduler.get_last_lr())      
+        ckp = model.state_dict()
+        PATH = f"/mnt/cs/voice/korenevskaya-a/nirma/checkpoints_ngram_attention/checkpoint_{epoch}.pt"
+        torch.save(ckp, PATH)
+        print(f"Epoch {epoch} | Training checkpoint saved at {PATH}")        
 
     def test():
-        model.eval()
+        print("Start evaluating...")
         results = [] 
-        ans = [] 
-        with torch.no_grad():
-            for idx, data in enumerate(tqdm(testing_loader), 0):
-                sentences = data['lem_words']
-                sentences = list(zip(*[list(x) for x in sentences]))
-                targets = data['targets'].to(device, dtype = torch.float)
-                #print(targets)
-                embs = torch.empty((len(sentences), MAX_LEN, EMBED_LEN)).to(device, dtype = torch.float)
-                for idx, sentence in enumerate(sentences): 
-                    #print(sentence)
-                    s_embs =torch.empty((MAX_LEN, EMBED_LEN)).to(device, dtype = torch.float)
-                    for i, word in enumerate(sentence):
-                        if word != '<EOS>':
-                            s_embs[i] = torch.from_numpy(ft.get_word_vector(word))
-                        else:
-                            s_embs[i] = training_set.eof   
-                    embs[idx] = s_embs    
-                embs = torch.unsqueeze(embs, 1)
-                outputs = model(embs)
-                outputs = outputs.squeeze()
-                #print(outputs)    
-                
+        ans = []
+        model.eval()
+        for _,data in enumerate(tqdm(testing_loader), 0):
+            # preprocessing
+            sentences = data[0]
+            targets = data[1]#.to(device, dtype = torch.float)
+            # for i, tar in enumerate(targets_):
+            #     if tar == 0:
+            #         targets[i] = torch.tensor([1.,0.])
+            #     else:
+            #         targets[i] = torch.tensor([0.,1.])
+
+            for idx, sentence in enumerate(sentences): 
+                for i, word in enumerate(sentence):
+                    # if emb is pure zeros, then it is altered into trainable eos embedding
+                    if torch.all(word.eq(torch.zeros_like(word))):
+                        with torch.no_grad():
+                            sentences[idx][i] = model.eos    
+            sentences = torch.unsqueeze(sentences, 1)    
+            
+            with torch.no_grad():
+                outputs = model(sentences.to(device, dtype=torch.float))
                 results += outputs
-                ans += targets    
+                ans += targets 
+                
         results = np.array([r.cpu().numpy() for r in results])
-        results = [(1 if result[1] == 1 else 0) for result in results]
+        results = [(1 if result[1] > result[0] else 0) for result in results]
         ans = np.array([r.cpu().numpy() for r in ans])
         f1 = f1_score(results, ans, average='weighted')
         acc = accuracy_score(results, ans)
         print(f'len test: {len(results)}\n F1: {f1}\n Accuracy: {acc}\n')   
+        print("Evaluation ended.")
     
 
-    def test_for_sure():
+    def check():
+        print("Start checking...")
+        results = [] 
+        ans = []
         model.eval()
-        results = [] #torch.empty((len(test_dataset)))
-        ans = [] #torch.empty((len(test_dataset)))
-        with torch.no_grad():
-            for idx, data in enumerate(tqdm(testing_loader), 0):
-                if idx < 100:
-                    sentences = data['lem_words']
-                    sentences = list(zip(*[list(x) for x in sentences]))
-                    targets = data['targets'].to(device, dtype = torch.float)
-                    #print(targets)
-                    embs = torch.empty((len(sentences), MAX_LEN, EMBED_LEN)).to(device, dtype = torch.float)
-                    for idx, sentence in enumerate(sentences): 
-                        #print(sentence)
-                        s_embs =torch.empty((MAX_LEN, EMBED_LEN)).to(device, dtype = torch.float)
-                        for i, word in enumerate(sentence):
-                            if word != '<EOS>':
-                                s_embs[i] = torch.from_numpy(ft.get_word_vector(word))
-                            else:
-                                s_embs[i] = training_set.eof   
-                        embs[idx] = s_embs    
-                    embs = torch.unsqueeze(embs, 1)
-                    outputs = model(embs)
-                    outputs = outputs.squeeze()
-                    #print(outputs)    
-                    
+        for idx ,data in enumerate(tqdm(testing_loader), 0):
+            if idx < 40:
+                # preprocessing
+                sentences = data[0]
+                targets = data[1]#.to(device, dtype = torch.float)
+                # for i, tar in enumerate(targets_):
+                #     if tar == 0:
+                #         targets[i] = torch.tensor([1.,0.])
+                #     else:
+                #         targets[i] = torch.tensor([0.,1.])
+
+                for idx, sentence in enumerate(sentences): 
+                    for i, word in enumerate(sentence):
+                        # if emb is pure zeros, then it is altered into trainable eos embedding
+                        if torch.all(word.eq(torch.zeros_like(word))):
+                            with torch.no_grad():
+                                sentences[idx][i] = model.eos    
+                sentences = torch.unsqueeze(sentences, 1)    
+                
+                with torch.no_grad():
+                    outputs = model(sentences.to(device, dtype=torch.float))
                     results += outputs
-                    ans += targets    
+                    ans += targets 
+                    
         results = np.array([r.cpu().numpy() for r in results])
-        results = [(1 if result[1] == 1 else 0) for result in results]
+        print(results)
+        results = [(1 if result[1] > result[0] else 0) for result in results]
         print(results)
         ans = np.array([r.cpu().numpy() for r in ans])
         print(f"ans sum: {np.sum(ans)}")
+        print(f"ans:{ans}")
         f1 = f1_score(results, ans, average='weighted')
         acc = accuracy_score(results, ans)
         print(f'len test: {len(results)}\n F1: {f1}\n Accuracy: {acc}\n')   
@@ -259,13 +291,13 @@ def main():
         for epoch in range(EPOCHS):
             train(epoch) 
     if MODE == 'test':
-        checkpoint = torch.load('checkpoints_ngram_attention/checkpoint_9.pt')
+        checkpoint = torch.load('checkpoints_ngram_attention/checkpoint_4.pt')
         model.load_state_dict(checkpoint)
         test()  
     if MODE == 'check':
-        checkpoint = torch.load('checkpoints_ngram_attention/checkpoint_9.pt')
+        checkpoint = torch.load('checkpoints_ngram_attention/checkpoint_4.pt')
         model.load_state_dict(checkpoint)
-        test_for_sure()
+        check()
 
  
 if __name__ == "__main__":
