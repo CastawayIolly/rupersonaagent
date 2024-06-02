@@ -1,0 +1,6 @@
+numpy==1.24.4
+torch==2.1.2
+faiss-cpu==1.7.4
+transformers==3.0.2
+tensorboard==2.14.0
+torchtext==0.16.2
