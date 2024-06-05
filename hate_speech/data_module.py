@@ -1,19 +1,9 @@
-import numpy as np
-import pandas as pd
-from sklearn import metrics
-import transformers
 import torch
-from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampler
-from transformers import BertTokenizer, BertModel, BertConfig
-from torch import cuda
+from torch.utils.data import Dataset
 from tqdm import tqdm
-from nltk.tokenize import word_tokenize
 from string import punctuation
-import nltk
 from pymystem3 import Mystem
 from nltk.tokenize import TweetTokenizer 
-from nltk.stem.snowball import SnowballStemmer
-from nltk.corpus import stopwords
 import fasttext
 import fasttext.util
 from torch import nn 

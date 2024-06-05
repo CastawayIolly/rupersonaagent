@@ -1,21 +1,10 @@
-import numpy as np
 import pandas as pd
-from sklearn.metrics import f1_score, accuracy_score
-import transformers
-from torch import nn
-from torch.utils.data import TensorDataset, Dataset, DataLoader, RandomSampler, SequentialSampler
-from transformers import BertTokenizer, BertModel, BertConfig
-from torch import cuda
+from torch.utils.data import TensorDataset, Dataset, DataLoader
 from tqdm import tqdm
 import torch
 import fasttext
-import nltk
-from torchsummary import summary
 import pickle
 
-import torch
-import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
 from data_module import CustomDataset
 from ngram_attention import NGramAttention
 
@@ -70,7 +59,7 @@ class Trainer:
         self.model = DDP(model, device_ids=[gpu_id], find_unused_parameters=True)
     
     def loss_fn(self, outputs, targets):
-        #return torch.nn.CrossEntropyLoss(weight=torch.tensor([0.3, 0.7], dtype=torch.float).to(self.gpu_id))(outputs, targets)
+        # return torch.nn.CrossEntropyLoss(weight=torch.tensor([0.3, 0.7], dtype=torch.float).to(self.gpu_id))(outputs, targets)
         return torch.nn.CrossEntropyLoss()(outputs, targets)
   
     def _run_epoch(self, epoch):

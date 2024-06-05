@@ -1,20 +1,12 @@
 import numpy as np
 import pandas as pd
-from sklearn import metrics
-import transformers
 from torch import nn
-from torch.utils.data import TensorDataset, Dataset, DataLoader, RandomSampler, SequentialSampler
-from transformers import BertTokenizer, BertModel, BertConfig
+from torch.utils.data import TensorDataset, DataLoader
 from torch import cuda
 from tqdm import tqdm
 import torch
 import fasttext
 from data_module import CustomDataset
-import nltk
-import torch.multiprocessing as mp
-from torch.utils.data.distributed import DistributedSampler
-from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.distributed import init_process_group, destroy_process_group
 from sklearn.metrics import f1_score, accuracy_score
 import os.path
 import pickle
