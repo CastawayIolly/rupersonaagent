@@ -208,10 +208,10 @@ def main():
         results = []
         ans = []
         model.eval()
-        for _,data in enumerate(tqdm(testing_loader), 0):
+        for _, data in enumerate(tqdm(testing_loader), 0):
             # preprocessing
             sentences = data[0]
-            targets = data[1] # .to(device, dtype = torch.float)
+            targets = data[1]  # .to(device, dtype = torch.float)
             # for i, tar in enumerate(targets_):
             #     if tar == 0:
             #         targets[i] = torch.tensor([1.,0.])
@@ -239,17 +239,16 @@ def main():
         print(f'len test: {len(results)}\n F1: {f1}\n Accuracy: {acc}\n')
         print("Evaluation ended.")
 
-
     def check():
         print("Start checking...")
         results = []
         ans = []
         model.eval()
-        for idx ,data in enumerate(tqdm(testing_loader), 0):
+        for idx, data in enumerate(tqdm(testing_loader), 0):
             if idx < 40:
                 # preprocessing
                 sentences = data[0]
-                targets = data[1] # .to(device, dtype = torch.float)
+                targets = data[1]  # .to(device, dtype = torch.float)
                 # for i, tar in enumerate(targets_):
                 #     if tar == 0:
                 #         targets[i] = torch.tensor([1.,0.])
@@ -262,7 +261,7 @@ def main():
                         if torch.all(word.eq(torch.zeros_like(word))):
                             with torch.no_grad():
                                 sentences[idx][i] = model.eos
-                sentences = torch.unsqueeze(sentences, 1) 
+                sentences = torch.unsqueeze(sentences, 1)
 
                 with torch.no_grad():
                     outputs = model(sentences.to(device, dtype=torch.float))
