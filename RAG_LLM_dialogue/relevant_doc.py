@@ -56,4 +56,3 @@ def get_context(ranked_documents):
     query_reranked = [q[0] for q in query_reranked]
     context = ('\n').join(query_reranked)
     return context
-

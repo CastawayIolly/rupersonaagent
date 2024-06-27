@@ -10,7 +10,6 @@ from datasets import load_from_disk
 
 def evaluate_model(checkpoint_dir, data_path, model_name, max_length, batch_size, device):
     dataset = load_from_disk(dataset_path=data_path)
-    
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     test_dataset = CustomDataset(dataset['test'], tokenizer, max_length=max_length)
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
@@ -48,6 +47,8 @@ def evaluate_model(checkpoint_dir, data_path, model_name, max_length, batch_size
     print(f'MRR: {mrr}')
     print(f'Recall@1: {r1}')
     print(f'Recall@5: {r5}')
+    
+    
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('--checkpoint_dir', type=str, required=True, help='Path to the trained model checkpoint')
@@ -58,4 +59,3 @@ if __name__ == '__main__':
     parser.add_argument('--device', type=str, default='cuda' if torch.cuda.is_available() else 'cpu', help='Device (cuda or cpu)')
     args = parser.parse_args()
     evaluate_model(args.checkpoint_dir, args.data_path, args.model_name, args.max_length, args.batch_size, args.device)
-

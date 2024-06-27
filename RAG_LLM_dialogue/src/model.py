@@ -10,8 +10,10 @@ class CustomDataset(Dataset):
         self.dataset = dataset
         self.tokenizer = tokenizer
         self.max_length = max_length
+    
     def __len__(self):
         return len(self.dataset)
+    
     def __getitem__(self, idx):
         query = self.dataset[idx]['query']
         candidate = self.dataset[idx]['candidate']
@@ -38,18 +40,20 @@ class CustomDataset(Dataset):
             'candidate_attention_mask': candidate_inputs['attention_mask'].squeeze(0)
         }
 class BiEncoder(pl.LightningModule):
-    def __init__(self, model_name= 'cointegrated/rubert-tiny2', lr=2e-5):
+    def __init__(self, model_name='cointegrated/rubert-tiny2', lr=2e-5):
         super(BiEncoder, self).__init__()
         self.query_encoder = AutoModel.from_pretrained(model_name)
         self.candidate_encoder = AutoModel.from_pretrained(model_name)
         self.loss_fn = nn.CosineEmbeddingLoss(margin=0.5)
         self.lr = lr
+        
     def forward(self, query_input_ids, query_attention_mask, candidate_input_ids, candidate_attention_mask):
         query_outputs = self.query_encoder(query_input_ids, query_attention_mask)
         candidate_outputs = self.candidate_encoder(candidate_input_ids, candidate_attention_mask)
-        query_embeddings = query_outputs.last_hidden_state[:, 0, :] 
-        candidate_embeddings = candidate_outputs.last_hidden_state[:, 0, :] 
+        query_embeddings = query_outputs.last_hidden_state[:, 0, :]
+        candidate_embeddings = candidate_outputs.last_hidden_state[:, 0, :]
         return query_embeddings, candidate_embeddings
+    
     def training_step(self, batch, batch_idx):
         query_input_ids = batch['query_input_ids']
         query_attention_mask = batch['query_attention_mask']
@@ -62,6 +66,7 @@ class BiEncoder(pl.LightningModule):
         loss = self.loss_fn(query_embeddings, candidate_embeddings, labels)
         self.log('train_loss', loss)
         return loss
+    
     def validation_step(self, batch, batch_idx):
         query_input_ids = batch['query_input_ids']
         query_attention_mask = batch['query_attention_mask']
@@ -74,5 +79,6 @@ class BiEncoder(pl.LightningModule):
         loss = self.loss_fn(query_embeddings, candidate_embeddings, labels)
         self.log('val_loss', loss)
         return loss
+    
     def configure_optimizers(self):
         return torch.optim.AdamW(self.parameters(), lr=self.lr)

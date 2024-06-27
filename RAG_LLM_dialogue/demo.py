@@ -9,8 +9,6 @@ from query_document import qa_chain
 class ChatWrapper:
     def __init__(self):
         self.lock = Lock()
-        
-        
     def __call__(self, inp: str, history: Optional[Tuple[str, str]]):
         self.lock.acquire()
         try:
@@ -20,9 +18,8 @@ class ChatWrapper:
             ranked_documents = relevant_doc.get_ranked_documents(inp, multiquery_ss_results)
             print(ranked_documents)
             context = relevant_doc.get_context(ranked_documents)
-            
             chain = qa_chain()
-            persona = ['Я пенсионерка.', 'Я хорошо готовлю.','У меня двое внуков.','Я работала инженером.']
+            persona = ['Я пенсионерка.', 'Я хорошо готовлю.', 'У меня двое внуков.', 'Я работала инженером.']
             output = chain.invoke({"question": inp, "persona": persona, "context": context})
             history.append((inp, output))
         except Exception as e:
@@ -30,6 +27,8 @@ class ChatWrapper:
         finally:
             self.lock.release()
         return history, history
+    
+    
 chat = ChatWrapper()
 theme = gr.themes.Default(primary_hue="slate", secondary_hue="violet").set(body_background_fill="#ede8f7")
 css = """
