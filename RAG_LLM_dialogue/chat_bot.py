@@ -23,7 +23,7 @@ def main(question):
             formatted_answer = f"{BOLD}{GREEN}{a}{RESET}"
             click.echo(f"{formatted_question} -> {formatted_answer}")
         question = click.prompt('\nYour Question', default="Где ты живешь?")
-        
-        
+
+
 if __name__ == '__main__':
     main()

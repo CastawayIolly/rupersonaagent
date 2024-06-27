@@ -18,21 +18,21 @@ class TestBiEncoderModel:
         cls.train_dataloader = DataLoader(cls.train_dataset, batch_size=8, shuffle=True)
         cls.val_dataloader = DataLoader(cls.val_dataset, batch_size=8, shuffle=False)
         cls.model = BiEncoder(model_name="cointegrated/rubert-tiny2", lr=2e-5)
-        
+
     def test_tokenizer_length(self):
         print(len(self.tokenizer))
         assert_that(len(self.tokenizer), equal_to(83828))
-        
+
     def test_train_dataloader(self):
         train_batch = next(iter(self.train_dataloader))
         assert_that(len(train_batch['query_input_ids']), equal_to(8))
         assert_that(train_batch.keys(), equal_to({'query_input_ids', 'query_attention_mask', 'candidate_input_ids', 'candidate_attention_mask'}))
-        
+
     def test_validation_dataloader(self):
         val_batch = next(iter(self.val_dataloader))
         assert_that(len(val_batch['query_input_ids']), equal_to(8))
         assert_that(val_batch.keys(), equal_to({'query_input_ids', 'query_attention_mask', 'candidate_input_ids', 'candidate_attention_mask'}))
-        
+
     def test_embeddings_size(self):
         sample_batch = next(iter(self.train_dataloader))
         query_embeddings, candidate_embeddings = self.model(

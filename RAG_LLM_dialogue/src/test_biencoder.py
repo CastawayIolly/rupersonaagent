@@ -47,8 +47,8 @@ def evaluate_model(checkpoint_dir, data_path, model_name, max_length, batch_size
     print(f'MRR: {mrr}')
     print(f'Recall@1: {r1}')
     print(f'Recall@5: {r5}')
-    
-    
+
+
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('--checkpoint_dir', type=str, required=True, help='Path to the trained model checkpoint')
