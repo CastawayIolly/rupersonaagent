@@ -9,7 +9,7 @@ from query_document import qa_chain
 class ChatWrapper:
     def __init__(self):
         self.lock = Lock()
-        
+
     def __call__(self, inp: str, history: Optional[Tuple[str, str]]):
         self.lock.acquire()
         try:
@@ -28,6 +28,8 @@ class ChatWrapper:
         finally:
             self.lock.release()
         return history, history
+
+
 chat = ChatWrapper()
 theme = gr.themes.Default(primary_hue="slate", secondary_hue="violet").set(body_background_fill="#ede8f7")
 css = """

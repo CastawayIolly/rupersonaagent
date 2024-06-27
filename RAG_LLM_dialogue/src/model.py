@@ -39,8 +39,8 @@ class CustomDataset(Dataset):
             'candidate_input_ids': candidate_inputs['input_ids'].squeeze(0),
             'candidate_attention_mask': candidate_inputs['attention_mask'].squeeze(0)
         }
-        
-        
+
+
 class BiEncoder(pl.LightningModule):
     def __init__(self, model_name='cointegrated/rubert-tiny2', lr=2e-5):
         super(BiEncoder, self).__init__()
