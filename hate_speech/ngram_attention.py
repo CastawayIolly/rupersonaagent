@@ -80,9 +80,9 @@ class NGramAttention(nn.Module):
         self.block2 = nn.Sequential(self.conv2, self.perm2, self.flatten2, self.gru2)
         self.block3 = nn.Sequential(self.conv3, self.perm3, self.flatten3, self.gru3)
         self.final_block = nn.Sequential(self.dense1,
-                                self.relu,
-                                self.dropout,
-                                self.dense2)
+                                            self.relu,
+                                            self.dropout,
+                                            self.dense2)
         self.softmax = nn.Softmax(dim=1)
         self.eos = nn.Parameter(torch.randn(300), requires_grad=True)
 
@@ -142,16 +142,14 @@ def main():
     testing_set = TensorDataset(testing_set[0], testing_set[1])
 
     train_params = {'batch_size': TRAIN_BATCH_SIZE,
-            'shuffle': True,
-            'drop_last': True,
-            'num_workers': 0
-            }
+                    'shuffle': True,
+                    'drop_last': True,
+                    'num_workers': 0}
 
     test_params = {'batch_size': VALID_BATCH_SIZE,
-                'shuffle': True,
-                'drop_last': True,
-                'num_workers': 0
-                }
+                    'shuffle': True,
+                    'drop_last': True,
+                    'num_workers': 0}
 
     training_loader = DataLoader(training_set, **train_params)
     testing_loader = DataLoader(testing_set, **test_params)
