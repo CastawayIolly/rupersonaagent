@@ -147,9 +147,9 @@ def main():
                     'num_workers': 0}
 
     test_params = {'batch_size': VALID_BATCH_SIZE,
-                    'shuffle': True,
-                    'drop_last': True,
-                    'num_workers': 0}
+                   'shuffle': True,
+                   'drop_last': True,
+                   'num_workers': 0}
 
     training_loader = DataLoader(training_set, **train_params)
     testing_loader = DataLoader(testing_set, **test_params)
