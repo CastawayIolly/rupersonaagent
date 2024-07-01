@@ -1,6 +1,6 @@
 ## Data format
 
-The expected data format is two columns query and candidate, where query contains the dialogue history and candidate contains the next turn of dialogue, the dataset contains special tokens <p-1> and <p-2>.
+The expected data format is two columns query and candidate, where query contains the dialogue history and candidate contains the next turn of dialogue.
 
 Entry example:
 ```
