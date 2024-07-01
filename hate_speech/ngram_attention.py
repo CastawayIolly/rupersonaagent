@@ -80,9 +80,9 @@ class NGramAttention(nn.Module):
         self.block2 = nn.Sequential(self.conv2, self.perm2, self.flatten2, self.gru2)
         self.block3 = nn.Sequential(self.conv3, self.perm3, self.flatten3, self.gru3)
         self.final_block = nn.Sequential(self.dense1,
-                                            self.relu,
-                                            self.dropout,
-                                            self.dense2)
+                                         self.relu,
+                                         self.dropout,
+                                         self.dense2)
         self.softmax = nn.Softmax(dim=1)
         self.eos = nn.Parameter(torch.randn(300), requires_grad=True)
 
