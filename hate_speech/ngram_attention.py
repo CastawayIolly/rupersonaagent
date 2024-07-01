@@ -283,11 +283,11 @@ def main():
         for epoch in range(EPOCHS):
             train(epoch)
     if MODE == 'test':
-        checkpoint = torch.load('checkpoints_ngram_attention/checkpoint_4.pt')
+        checkpoint = torch.load('/mnt/cs/voice/korenevskaya-a/nirma/checkpoints_ngram_attention/checkpoint_4.pt')
         model.load_state_dict(checkpoint)
         test()
     if MODE == 'check':
-        checkpoint = torch.load('checkpoints_ngram_attention/checkpoint_4.pt')
+        checkpoint = torch.load('/mnt/cs/voice/korenevskaya-a/nirma/checkpoints_ngram_attention/checkpoint_4.pt')
         model.load_state_dict(checkpoint)
         check()
 
