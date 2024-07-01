@@ -25,14 +25,16 @@ MODE = 'train'
 fasttext.util.download_model('ru', if_exists='ignore')
 ft = fasttext.load_model('cc.ru.300.bin')
 
+
 class Permute(nn.Module):
     def __init__(self, dims):
         super(Permute, self).__init__()
         self.dims = dims
-        
+
     def forward(self, x):
         x = x.permute(self.dims).contiguous()
         return x
+
 
 class NGramAttention(nn.Module):
     def __init__(self):
@@ -78,9 +80,9 @@ class NGramAttention(nn.Module):
         self.block2 = nn.Sequential(self.conv2, self.perm2, self.flatten2, self.gru2)
         self.block3 = nn.Sequential(self.conv3, self.perm3, self.flatten3, self.gru3)
         self.final_block = nn.Sequential(self.dense1,
-                                    self.relu,
-                                    self.dropout,
-                                    self.dense2)
+                                self.relu,
+                                self.dropout,
+                                self.dense2)
         self.softmax = nn.Softmax(dim=1)
         self.eos = nn.Parameter(torch.randn(300), requires_grad=True)
 
@@ -88,23 +90,23 @@ class NGramAttention(nn.Module):
         x1, _ = self.block1(inputs)
         x1 = self.tanh1(self.lin_for_att1(x1))
         alpha1 = self.soft1(torch.matmul(x1, self.ngram_context1))
-        x1 = torch.sum((x1.transpose(0, 2).transpose(1, 2)*alpha1), axis=1)
+        x1 = torch.sum((x1.transpose(0, 2).transpose(1, 2) * alpha1), axis=1)
 
         x2, _ = self.block2(inputs)
         x2 = self.tanh2(self.lin_for_att2(x2))
         alpha2 = self.soft2(torch.matmul(x2, self.ngram_context2))
-        x2 = torch.sum((x2.transpose(0, 2).transpose(1, 2)*alpha2), axis=1)
+        x2 = torch.sum((x2.transpose(0, 2).transpose(1, 2) * alpha2), axis=1)
 
         x3, _ = self.block3(inputs)
         x3 = self.tanh3(self.lin_for_att3(x3))
         alpha3 = self.soft3(torch.matmul(x3, self.ngram_context3))
-        x3 = torch.sum((x3.transpose(0, 2).transpose(1, 2)*alpha3), axis=1)
+        x3 = torch.sum((x3.transpose(0, 2).transpose(1, 2) * alpha3), axis=1)
 
-        x = torch.cat([x1, x2, x3], dim = 0)
+        x = torch.cat([x1, x2, x3], dim=0)
         # print(x)
         out = self.final_block(x.transpose(0, 1))
         # print(f'out: {out.shape}')
-        return out # self.softmax(out)
+        return out  # self.softmax(out)
 
 
 def main():
@@ -115,8 +117,8 @@ def main():
     df = pd.read_csv("out_data/ToxicRussianComments.csv")
 
     train_size = 0.8
-    train_dataset=df.sample(frac=train_size, random_state=200)
-    test_dataset=df.drop(train_dataset.index).reset_index(drop=True)
+    train_dataset = df.sample(frac=train_size, random_state=200)
+    test_dataset = df.drop(train_dataset.index).reset_index(drop=True)
     train_dataset = train_dataset.reset_index(drop=True)
 
     print("FULL Dataset: {}".format(df.shape))
@@ -129,7 +131,7 @@ def main():
     else:
         with open('fasttext_train.pkl', 'rb') as fp:
             training_set = pickle.load(fp)
-    training_set = TensorDataset(training_set[0], training_set[1]) 
+    training_set = TensorDataset(training_set[0], training_set[1])
 
     if not os.path.isfile('fasttext_test.pkl'):
         testing_set = CustomDataset(test_dataset, tokenizer, MAX_LEN, 'test')
@@ -140,23 +142,22 @@ def main():
     testing_set = TensorDataset(testing_set[0], testing_set[1])
 
     train_params = {'batch_size': TRAIN_BATCH_SIZE,
+            'shuffle': True,
+            'drop_last': True,
+            'num_workers': 0
+            }
+
+    test_params = {'batch_size': VALID_BATCH_SIZE,
                 'shuffle': True,
                 'drop_last': True,
                 'num_workers': 0
                 }
-
-    test_params = {'batch_size': VALID_BATCH_SIZE,
-                    'shuffle': True,
-                    'drop_last': True,
-                    'num_workers': 0
-                    }
 
     training_loader = DataLoader(training_set, **train_params)
     testing_loader = DataLoader(testing_set, **test_params)
 
     model = NGramAttention()
     model.to(device)
-
 
     def loss_fn(outputs, targets):
         return torch.nn.CrossEntropyLoss(torch.tensor([0.4, 0.6], dtype=torch.float).to(device='cuda'))(outputs, targets)
@@ -169,13 +170,13 @@ def main():
         for index, data in enumerate(tqdm(training_loader), 0):
             # preprocessing
             sentences = data[0]
-            targets_ = data[1] # .to(device, dtype = torch.float)
+            targets_ = data[1]  # .to(device, dtype = torch.float)
             targets = torch.empty((len(data[1]), 2), dtype=torch.float)
             for i, tar in enumerate(targets_):
                 if tar == 0:
-                    targets[i] = torch.tensor([1.,0.])
+                    targets[i] = torch.tensor([1., 0.])
                 else:
-                    targets[i] = torch.tensor([0.,1.])
+                    targets[i] = torch.tensor([0., 1.])
 
             for idx, sentence in enumerate(sentences):
                 for i, word in enumerate(sentence):
@@ -191,7 +192,7 @@ def main():
 
                 optimizer.zero_grad()
                 loss = loss_fn(outputs, targets.to(device, dtype=torch.float))
-                if index %50 ==0:
+                if index % 50 == 0:
                     print(f'Epoch: {epoch}, Loss:  {loss.item()}')
 
                 loss.backward()

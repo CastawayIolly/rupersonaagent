@@ -66,7 +66,7 @@ class Trainer:
 
     def _run_epoch(self, epoch):
         self.train_data.sampler.set_epoch(epoch)
-   
+
         for _, data in enumerate(tqdm(self.train_data), 0):
             sentences = data[0]
             targets_ = data[1]
@@ -157,11 +157,11 @@ def prepare_dataloader(train_dataset: Dataset, test_dataset: Dataset, batch_size
                             drop_last=True,
                             sampler=DistributedSampler(train_dataset))
     test_data = DataLoader(test_dataset,
-                        batch_size,
-                        pin_memory=True,
-                        num_workers=1,
-                        shuffle=False,
-                        drop_last=False,)
+                    batch_size,
+                    pin_memory=True,
+                    num_workers=1,
+                    shuffle=False,
+                    drop_last=False,)
     return train_data, test_data
 
 
@@ -186,4 +186,4 @@ if __name__ == "__main__":
 
     world_size = torch.cuda.device_count()
     mp.spawn(main, args=(world_size, args.save_every, args.total_epochs, args.batch_size), nprocs=world_size)
-    
+
