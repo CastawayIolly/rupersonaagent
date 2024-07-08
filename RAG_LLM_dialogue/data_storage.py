@@ -19,7 +19,7 @@ def create_vectorstore(
     raw_documents = loader.load()
     print("Document loaded using DataFrameLoader from LangChain")
 
-    text_splitter=RecursiveCharacterTextSplitter(
+    text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=400,
         chunk_overlap=100
     )
@@ -30,7 +30,7 @@ def create_vectorstore(
         inference_api_key = getpass.getpass("Enter your HF Inference API Key:\n\n")
 
     embeddings = HuggingFaceEmbeddings(model_name=model_name)
-    
+
     vectorstore = FAISS.from_documents(documents, embeddings)
     print("Created a vectorstore using FAISS from LangChain")
 
