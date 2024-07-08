@@ -1,6 +1,6 @@
 ## Data format
 
-The expected data format is two columns query and candidate, where query contains the dialogue history and candidate contains the next turn of dialogue, the dataset contains special tokens <p-1> and <p-2>.
+The expected data format is two columns query and candidate, where query contains the dialogue history and candidate contains the next turn of dialogue.
 
 Entry example:
 ```
@@ -42,7 +42,7 @@ DatasetDict({
 ```
 
 For our experiments we used ['Toloka Persona Chat Rus'](https://toloka.ai/ru/datasets/?datasets-category=nlp#datasets).
-Default model ['rubert-tiny2'] (https://huggingface.co/cointegrated/rubert-tiny2) was used as retriever.
+Default model ['rubert-tiny2'](https://huggingface.co/cointegrated/rubert-tiny2) was used as retriever.
 LLM model - 
 
 Data preprocessing was done using ['data_processing.ipynb'](data_processing.ipynb)
