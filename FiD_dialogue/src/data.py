@@ -100,7 +100,7 @@ class Collator(object):
         self.tokenizer = tokenizer
         self.text_maxlength = text_maxlength
         self.answer_maxlength = answer_maxlength
-        self.last_n = 5
+        self.last_n = last_n
 
     def __call__(self, batch):
         assert (batch[0]['target'] is not None)

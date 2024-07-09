@@ -161,12 +161,6 @@ def evaluate(model, dataset, tokenizer, collator, opt):
                 if i * batch_size + k in example_ids and opt.output_examples:
                     print("ans:", ans)
                     print("gold:", gold[0])
-                    # print("contexts:")
-                    # contexts = [
-                    #     tokenizer.decode(
-                    #         c, skip_special_tokens=True) for c in context_ids[k]]
-                    # for c in contexts:
-                    #     print(c)
                     print()
 
                 score = src.evaluation.ems(ans, gold)
