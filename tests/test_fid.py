@@ -1,9 +1,7 @@
 from FiD_dialogue.fidagent import FiDAgent
 from FiD_dialogue.src.data import Dataset, Collator, load_data
-import json
 import pytest
 import torch
-from hamcrest import assert_that, equal_to
 
 
 model_path = "/home/stc/disk/tirskikh/checkpoint/ru_experiment7/checkpoint/latest"
@@ -47,7 +45,7 @@ class TestFidAgent:
     def test_chat(self):
         agent.clear_context()
         response = agent.chat(message)
-        assert isinstance(response, str)        
+        assert isinstance(response, str)
         assert len(response) > 0
         assert len(agent.context) == 2
 
