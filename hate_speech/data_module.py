@@ -14,13 +14,12 @@ ft = fasttext.load_model('cc.ru.300.bin')
 
 punctuations = list(punctuation) + ['-'] + ['...']
 lem = Mystem()
-# stop_words = set(stopwords.words('russian'))
 tk = TweetTokenizer()
 
 
 class CustomDataset(Dataset):
 
-    def __init__(self, dataframe, tokenizer, max_len, regime=None):
+    def __init__(self, dataframe, regime=None, tokenizer=None, max_len=None):
         self.tokenizer = tokenizer
         self.data = dataframe
         self.comment_text = dataframe.comment
@@ -35,8 +34,8 @@ class CustomDataset(Dataset):
     def __getitem__(self, index):
         comment_text = str(self.comment_text[index])
         comment_text = " ".join(comment_text.split())
-        # for bert
-        # tokenization (preprocessing)
+        # For BERT model 
+        # Tokenization
         if self.tokenizer is not None:
             inputs = self.tokenizer.encode_plus(
                 comment_text,
@@ -49,14 +48,14 @@ class CustomDataset(Dataset):
             item["labels"] = torch.tensor([self.targets[index]])
             return item
 
-        # for ngram_attention
+        # For ngram_attention model
         else:
-            # tokenization and preprocessing
+            # Tokenization and preprocessing
             tokens = tk.tokenize(comment_text)
             words_without_punkt = [i for i in tokens if (i not in punctuations)]
             low_words = [i.lower() for i in words_without_punkt]
 
-            # computing fasttext features and padding for len 75 if necessary
+            # Compute fasttext features and pad for len 75 if necessary
             features = torch.empty((75, 300), dtype=torch.float)
             for i, word in enumerate(low_words):
                 if i < 75:
@@ -71,14 +70,16 @@ class CustomDataset(Dataset):
                     }
 
     def save_ft_feats(self):
-        # compute fasttext embeddings for ngram_attention and save into .pkl
+        # Compute fasttext embeddings for ngram_attention model and save into .pkl
         embeddings = torch.empty(((len(self.data)), 75, 300), dtype=torch.float)
         targets = torch.empty(((len(self.data)), 1), dtype=torch.float)
-        print(f'Compute fasttext embeddings for {self.regime}')
+        print(f'Compute FastText embeddings for {self.regime} dataset...')
+        
         for i in tqdm(range(len(self.data))):
             dict_ = self.__getitem__(i)
             embeddings[i] = (dict_['features'])
             targets[i] = (dict_['targets'])
+        
         save = [embeddings, targets]
         print(f'Save {self.regime} embeddings into fasttext_{self.regime}.pkl')
         with open(f'fasttext_{self.regime}.pkl', 'wb') as f:
