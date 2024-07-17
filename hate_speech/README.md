@@ -42,7 +42,7 @@ python -m hate_speech.train_ngram_attention --mode test
 Train and evaluate BERT model:
 
  ```shell
-python -m hate_speech.train_bert --mode test
+python -m hate_speech.train_bert
 ```
 Train and evaluate fusion model:
 
