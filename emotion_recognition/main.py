@@ -1,12 +1,5 @@
 from lightning.pytorch.cli import LightningCLI
-from clearml import Task, Logger
-import pandas as pd
-import matplotlib.pyplot as plt
-import re
-import os
-import datasets
-import torch
-import numpy as np
+from clearml import Task
 from lightning_module import MyModel
 from lightning_data_module import MyDataModule
 
@@ -65,6 +58,7 @@ class MyLightningCLI(LightningCLI):
         task.add_tags(config["clearml_tags"])
 
         return task
+
 
 def main():
     cli = MyLightningCLI(

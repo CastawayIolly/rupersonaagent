@@ -1,18 +1,10 @@
 import os
-from typing import *
+from typing import Literal
 
-
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
 import lightning.pytorch as pl
-import seaborn as sns
 import torch
-import tqdm
 import transformers
 import torchmetrics
-import re
-from clearml import Task, Logger
 
 import warnings
 
@@ -43,7 +35,6 @@ class MyModel(pl.LightningModule):
             len(self.tokenizer), pad_to_multiple_of=8
         )
 
-
         # dropout & activations
         self.dropout = torch.nn.Dropout(p=0.2, inplace=False)
         self.sigmoid = torch.nn.Sigmoid()
@@ -51,8 +42,8 @@ class MyModel(pl.LightningModule):
 
         # classification heads
         self.head = torch.nn.Linear(
-                self.encoder.config.hidden_size, 7
-            )
+            self.encoder.config.hidden_size, 7
+        )
         # loss
         self.cross_entropy_loss = torch.nn.CrossEntropyLoss(weight=torch.tensor([1.0, 100.0, 150.0, 150.0, 20.0, 70.0, 70.0,]))
 
@@ -65,8 +56,8 @@ class MyModel(pl.LightningModule):
         self.metrics = {}
         for split in ["train", "val", "test"]:
             self.metrics[split] = binary_classification.clone(
-                        prefix=f"{split}/"
-                    )
+                prefix=f"{split}/"
+            )
 
     def forward(self, input_ids, attention_mask, mask):
         # encode
@@ -87,7 +78,7 @@ class MyModel(pl.LightningModule):
         metrics = self.metrics["train"](
             logits, labels
         )
-        metrics = {f"train/f1{i}":m for i, m in enumerate(metrics['train/f1'])}
+        metrics = {f"train/f1{i}": m for i, m in enumerate(metrics['train/f1'])}
         # Log
         self.log("train_loss", loss.item(), sync_dist=True, batch_size=labels.shape[0])
         self.log_dict(
@@ -110,7 +101,7 @@ class MyModel(pl.LightningModule):
         metrics = self.metrics["val"](
             logits, labels
         )
-        metrics = {f"val/f1{i}":m for i, m in enumerate(metrics['val/f1'])}
+        metrics = {f"val/f1{i}": m for i, m in enumerate(metrics['val/f1'])}
 
         # Log
         self.log("val_loss", loss.item(), sync_dist=True, batch_size=labels.shape[0])
@@ -134,7 +125,7 @@ class MyModel(pl.LightningModule):
         metrics = self.metrics["test"](
             logits, labels
         )
-        metrics = {f"test/f1{i}":m for i, m in enumerate(metrics['test/f1'])}
+        metrics = {f"test/f1{i}": m for i, m in enumerate(metrics['test/f1'])}
 
         # Log
         self.log("test_loss", loss.item(), sync_dist=True, batch_size=labels.shape[0])

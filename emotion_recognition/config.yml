@@ -3,7 +3,7 @@ trainer:
   logger:
     class_path: lightning.pytorch.loggers.TensorBoardLogger
     init_args:
-      save_dir: /mnt/cs/nlu/models/SpeechAnalytics/SemanticSearch/outdir
+      save_dir: ./outdir
       name: rubert-tiny2
   enable_checkpointing: true
   callbacks:
