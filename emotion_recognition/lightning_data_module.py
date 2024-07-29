@@ -8,7 +8,7 @@ import datasets.distributed
 class MyDataModule(pl.LightningDataModule):
     def __init__(
         self,
-        model_name_or_path: str = input('Add path to model'),
+        model_name_or_path: str = 'cointegrated/rubert-tiny2',
         data_dir: str = "daily_dialog",
         train_bs: int = 32,
         val_bs: int = 32,
