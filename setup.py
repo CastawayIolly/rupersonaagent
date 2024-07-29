@@ -123,7 +123,7 @@ setup(
         'tiktoken==0.7.0',
         'sentence-transformers==3.0.1',
         'lightning==2.2.5',
-        'llama-cpp-python==0.2.78',
+        'llama-cpp-python==0.2.84',
         'accelerate==0.31.0',
         'ctransformers==0.2.27',
         'gradio==4.36.1',
