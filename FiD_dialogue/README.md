@@ -44,16 +44,16 @@ Data preprocessing was done using ['persona_chat_preprocess.ipynb'](persona_chat
 
 # I. Fusion-in-Decoder
 
-Fusion-in-Decoder models can be trained using [`train_reader.py`](train_reader.py) and evaluated with [`test_reader.py`](test_reader.py).
+Fusion-in-Decoder models can be trained using [`train_reader.py`](reader_train.py) and evaluated with [`test_reader.py`](reader_test.py).
 
 all the script parameters can be viewed in the [`options.py`](src/options.py) file.
 
 ## Train
 
-[`train_reader.py`](train_reader.py) provides the code to train a model. An example usage of the script is given below:
+[`train_reader.py`](reader_train.py) provides the code to train a model. An example usage of the script is given below:
 
 ```shell
-python train_reader.py \
+python reader_train.py \
         --train_data train_data.json \
         --eval_data eval_data.json \
         --base_model_path "path to your T5 model" \
@@ -66,10 +66,10 @@ Tensors of variable sizes lead to memory overhead. Encoder input tensors have a 
 
 ## Test
 
-You can evaluate your model or a pretrained model with [`test_reader.py`](test_reader.py). An example usage of the script is provided below.
+You can evaluate your model or a pretrained model with [`test_reader.py`](reader_test.py). An example usage of the script is provided below.
 
 ```shell
-python test_reader.py \
+python reader_test.py \
         --base_model_path
         --model_path checkpoint_dir/my_experiment/my_model_dir/checkpoint/best_dev \
         --eval_data eval_data.json \

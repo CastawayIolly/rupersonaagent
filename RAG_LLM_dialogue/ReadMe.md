@@ -65,7 +65,7 @@ python src/rain_biencoder.py \
 You can evaluate your model or a pretrained model with [`test_biencoder.py`](test_biencoder.py). An example usage of the script is provided below.
 
 ```shell
-python src/test_biencoder.py \
+python src/biencoder_test.py \
         --model_name
         --checkpoint_dir bi_encoder/biencoder_checkpoint.ckpt \
         --data_path data/toloka_data \

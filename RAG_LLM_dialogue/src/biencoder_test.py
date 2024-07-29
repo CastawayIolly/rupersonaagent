@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 
 import torch
-from model import BiEncoder, CustomDataset
+from RAG_LLM_dialogue.src.model import BiEncoder, CustomDataset
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 

@@ -5,7 +5,7 @@ from pytorch_lightning import Trainer
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
-from model import BiEncoder, CustomDataset
+from RAG_LLM_dialogue.src.model import BiEncoder, CustomDataset
 
 if __name__ == '__main__':
     parser = ArgumentParser()
