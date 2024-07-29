@@ -33,12 +33,12 @@ setup(
         'fire==0.4.0',
         'fonttools==4.38.0',
         'frozenlist==1.3.3',
-        'fsspec==2022.11.0',
+        'fsspec==2023.5.0',
         'furl==2.1.3',
         'google-auth==2.14.1',
         'google-auth-oauthlib==0.4.6',
         'grpcio==1.50.0',
-        'huggingface-hub==0.11.0',
+        'huggingface-hub==0.21.0',
         'hydra-core==1.1.2',
         'idna==3.4',
         'importlib-resources==5.2',
@@ -118,10 +118,12 @@ setup(
         'scipy==1.10.1',
         'pyhamcrest==2.0.4'
     ],
-    packages=find_packages(include=['generative_model', 'speech_extraction',
-                                    'inference_optimization', 'internet_memory_model',
-                                    'knowledge_distillation', 'personification',
-                                    'rule_based_information_extraction',
-                                    'tests', 'datasets'])
+    packages=find_packages(include=[
+        'generative_model', 'speech_extraction',
+        'inference_optimization', 'internet_memory_model',
+        'knowledge_distillation', 'personification',
+        'rule_based_information_extraction',
+        'tests', 'datasets'
+    ])
 
 )
