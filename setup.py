@@ -3,7 +3,7 @@ import subprocess
 from setuptools import setup, find_packages
 
 subprocess.check_call([sys.executable, "-m", "pip", "install", "PyYAML"])
-subprocess.check_call([sys.executable, "-m", "pip", "install", "llama-cpp-python==0.2.84"])
+subprocess.check_call([sys.executable, "-m", "pip", "install", "llama-cpp-python"])
 
 setup(
     name="RuPersonaAgent",
