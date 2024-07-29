@@ -45,7 +45,7 @@ class MyModel(pl.LightningModule):
             self.encoder.config.hidden_size, 7
         )
         # loss
-        self.cross_entropy_loss = torch.nn.CrossEntropyLoss(weight=torch.tensor([1.0, 100.0, 150.0, 150.0, 20.0, 70.0, 70.0,]))
+        self.cross_entropy_loss = torch.nn.CrossEntropyLoss(weight=torch.tensor([1.0, 100.0, 150.0, 150.0, 20.0, 70.0, 70.0]))
 
     def configure_model(self):
         binary_classification = torchmetrics.MetricCollection(
