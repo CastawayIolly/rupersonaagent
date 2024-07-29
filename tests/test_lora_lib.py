@@ -42,6 +42,6 @@ class TestModelTraining(unittest.TestCase):
         except Exception as e:
             self.fail(f"Training function raised an exception: {e}")
 
+
 if __name__ == "__main__":
     unittest.main()
-
