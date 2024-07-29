@@ -128,7 +128,6 @@ setup(
         'gradio==4.39.0',
         'unstructured==0.14.5',
         'evaluate==0.4.2',
-        'langchain-cli==0.0.26',
         'langchain_community==0.2.10',
         'pandas==1.5.1',
     ],
