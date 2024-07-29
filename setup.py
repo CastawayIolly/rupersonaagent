@@ -1,7 +1,7 @@
 import os
 from setuptools import setup, find_packages
 
-os.system('pip install PyYAML, llama-cpp-python')
+os.system('pip install PyYAML, llama-cpp-python, pandas==2.2.2')
 
 setup(
     name="RuPersonaAgent",
@@ -63,7 +63,6 @@ setup(
         'omegaconf==2.1.2',
         'orderedmultidict==1.0.1',
         'packaging==21.3',
-        'pandas==2.2.2',
         'pathlib2==2.3.7.post1',
         'pathspec==0.10.2',
         'peft==0.11.1',
