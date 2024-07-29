@@ -1,9 +1,7 @@
-import sys
-import subprocess
+import os
 from setuptools import setup, find_packages
 
-subprocess.check_call([sys.executable, "-m", "pip", "install", "PyYAML"])
-subprocess.check_call([sys.executable, "-m", "pip", "install", "llama-cpp-python"])
+os.system('pip install PyYAML, llama-cpp-python')
 
 setup(
     name="RuPersonaAgent",
