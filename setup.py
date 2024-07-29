@@ -118,7 +118,7 @@ setup(
         'scipy==1.10.1',
         'pyhamcrest==2.0.4',
         'sentencepiece==0.2.0',
-        'langchain==0.2.5',
+        'langchain==0.2.9',
         'faiss-cpu==1.8.0',
         'tiktoken==0.7.0',
         'sentence-transformers==3.0.1',
