@@ -3,7 +3,7 @@ import subprocess
 from setuptools import setup, find_packages
 
 subprocess.check_call([sys.executable, "-m", "pip", "install", "PyYAML"])
-
+subprocess.check_call([sys.executable, "-m", "pip", "install", "llama-cpp-python==0.2.84"])
 
 setup(
     name="RuPersonaAgent",
@@ -123,7 +123,6 @@ setup(
         'tiktoken==0.7.0',
         'sentence-transformers==3.0.1',
         'lightning==2.2.5',
-        'llama-cpp-python==0.2.84',
         'accelerate==0.31.0',
         'ctransformers==0.2.27',
         'gradio==4.36.1',
