@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 os.system('pip install '
           'PyYAML, '
           'llama-cpp-python, '
-          'bitsandbytes==0.43.1, pandas==1.5.1')
+          'bitsandbytes==0.43.1, ')
 
 setup(
     name="RuPersonaAgent",
@@ -129,6 +129,7 @@ setup(
         'unstructured==0.14.5',
         'evaluate==0.4.2',
         'langchain_community==0.2.10',
+        'pandas==1.5.1',
     ],
     packages=find_packages(include=[
         'generative_model', 'speech_extraction',
