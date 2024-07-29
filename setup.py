@@ -121,7 +121,7 @@ setup(
         'langchain==0.2.9',
         'faiss-cpu==1.8.0',
         'tiktoken==0.7.0',
-        'sentence-transformers==3.0.1',
+        'sentence-transformers',
         'lightning==2.2.5',
         'accelerate==0.31.0',
         'ctransformers==0.2.27',
