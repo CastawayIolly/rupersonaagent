@@ -114,7 +114,7 @@ def train(
 
             if opt.is_main and step % opt.save_freq == 0:
                 FiD_dialogue.src.util.save(model, optimizer, scheduler, step, best_dev_em,
-                              opt, checkpoint_path, f"step-{step}")
+                                           opt, checkpoint_path, f"step-{step}")
             if step > opt.total_steps:
                 break
 
