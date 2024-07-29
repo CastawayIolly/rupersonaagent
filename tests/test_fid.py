@@ -4,7 +4,7 @@ import pytest
 import torch
 
 
-model_path = "/home/stc/disk/tirskikh/checkpoint/ru_experiment7/checkpoint/latest"
+model_path = "ai-forever/ruT5-base"
 agent = FiDAgent(model_path=model_path, context_length=7, device="cuda:0")
 persona = ["Я факт1", "Я факт2", "Я факт3"]
 message = 'Привет'

@@ -116,7 +116,8 @@ setup(
         'yarl==1.8.1',
         'nltk==3.7',
         'scipy==1.10.1',
-        'pyhamcrest==2.0.4'
+        'pyhamcrest==2.0.4',
+        'sentencepiece==0.2.0'
     ],
     packages=find_packages(include=[
         'generative_model', 'speech_extraction',

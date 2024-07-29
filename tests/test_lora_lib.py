@@ -1,6 +1,9 @@
 import unittest
 from transformers import AutoTokenizer
 
+from lora_lib.lora_trainer import generate_prompt, tokenize, generate_and_tokenize_prompt, train
+
+
 class TestModelTraining(unittest.TestCase):
 
     def setUp(self):
