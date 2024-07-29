@@ -126,8 +126,6 @@ setup(
         'accelerate==0.31.0',
         'ctransformers==0.2.27',
         'gradio==4.39.0',
-        'unstructured==0.14.5',
-        'evaluate==0.4.2',
         'pandas==1.5.1',
     ],
     packages=find_packages(include=[
