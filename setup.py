@@ -10,7 +10,7 @@ setup(
     name="RuPersonaAgent",
     version="1.0.0",
     install_requires=[
-        'typer==0.9.0',
+        'typer==0.12',
         'aiohttp==3.8.5',
         'absl-py==1.3.0',
         'aiosignal==1.3.1',
@@ -125,7 +125,7 @@ setup(
         'lightning==2.2.5',
         'accelerate==0.31.0',
         'ctransformers==0.2.27',
-        'gradio==4.36.1',
+        'gradio==4.39.0',
         'unstructured==0.14.5',
         'evaluate==0.4.2',
         'langchain-cli==0.0.26',
