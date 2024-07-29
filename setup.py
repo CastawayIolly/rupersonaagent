@@ -1,7 +1,11 @@
 import os
 from setuptools import setup, find_packages
 
-os.system('pip install PyYAML, llama-cpp-python, pandas==2.2.2, bitsandbytes==0.43.1')
+os.system('pip install '
+          'PyYAML, '
+          'llama-cpp-python, '
+          'pandas==2.2.2, '
+          'bitsandbytes==0.43.1')
 
 setup(
     name="RuPersonaAgent",
@@ -12,7 +16,6 @@ setup(
         'aiosignal==1.3.1',
         'antlr4-python3-runtime==4.8',
         'async-timeout==4.0.2',
-        'bitsandbytes==0.43.1',
         'black==22.10.0',
         'beautifulsoup4==4.12.2',
         'cachetools==5.2.0',
