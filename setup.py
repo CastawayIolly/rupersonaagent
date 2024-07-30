@@ -102,7 +102,7 @@ setup(
         'tensorboardx==2.5.0',
         'tensorflow==2.11.0',
         'termcolor==2.1.0',
-        'tokenizers==0.13.2',
+        'tokenizers==0.14',
         'tomli==1.2.3',
         'torch==1.13.0',
         'torch-tb-profiler==0.4.0',
