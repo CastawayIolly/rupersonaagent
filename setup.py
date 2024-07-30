@@ -65,7 +65,7 @@ setup(
         'oauthlib==3.2.2',
         'omegaconf==2.1.2',
         'orderedmultidict==1.0.1',
-        'packaging==23.1',
+        'packaging==23.2',
         'pathlib2==2.3.7.post1',
         'pathspec==0.10.2',
         'peft==0.11.1',
