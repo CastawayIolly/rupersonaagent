@@ -122,7 +122,7 @@ setup(
         'faiss-cpu==1.8.0',
         'tiktoken==0.7.0',
         'sentence-transformers',
-        'lightning==2.2.5',
+        'lightning==1.8.6',
         'accelerate==0.31.0',
         'ctransformers==0.2.27',
         'unstructured==0.14.5',
