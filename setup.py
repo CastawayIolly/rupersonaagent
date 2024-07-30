@@ -125,7 +125,6 @@ setup(
         'lightning==1.8.6',
         'accelerate==0.31.0',
         'ctransformers==0.2.27',
-        'unstructured==0.14.5',
         'evaluate==0.4.2',
         'pandas==1.5.1',
     ],
