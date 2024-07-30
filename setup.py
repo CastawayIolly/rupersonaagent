@@ -88,7 +88,7 @@ setup(
         'pytz==2022.6',
         'pyyaml==6.0',
         'regex==2022.10.31',
-        'requests==2.28.1',
+        'requests=2.31.0',
         'requests-oauthlib==1.3.1',
         'responses==0.18.0',
         'rich==13.7.1',
