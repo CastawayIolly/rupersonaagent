@@ -110,7 +110,7 @@ setup(
         'tqdm==4.62.1',
         'transformers==4.43.3',
         'typing-extensions==4.6.1',
-        'urllib3==2.0',
+        'urllib3==1.26.19',
         'werkzeug==2.2.2',
         'xxhash==3.3.0',
         'yarl==1.8.1',
