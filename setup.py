@@ -49,7 +49,7 @@ setup(
         'h5py==3.9.0',
         'kiwisolver==1.4.4',
         'lightseq==3.0.1',
-        'lightning-utilities==0.8.0',
+        'lightning-utilities==0.3.0',
         'markdown==3.3.2',
         'markupsafe==2.1.1',
         'matplotlib==3.6.2',
