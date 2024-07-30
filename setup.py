@@ -57,7 +57,7 @@ setup(
         'multiprocess==0.70.12.2',
         'mypy-extensions==0.4.3',
         'numpy==1.21',
-        'nest-asyncio==1.5.7',
+        'nest-asyncio==1.6.0',
         'nvidia-cublas-cu11==11.10.3.66',
         'nvidia-cuda-nvrtc-cu11==11.7.99',
         'nvidia-cuda-runtime-cu11==11.7.99',
