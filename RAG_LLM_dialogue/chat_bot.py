@@ -1,5 +1,5 @@
 import click
-from query_document import qa_chain
+from RAG_LLM_dialogue.query_document import qa_chain
 
 CYAN = "\033[96m"
 GREEN = "\033[92m"

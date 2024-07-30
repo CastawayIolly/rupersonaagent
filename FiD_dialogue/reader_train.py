@@ -12,13 +12,13 @@ import transformers
 import numpy as np
 from pathlib import Path
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
-from src.options import Options
+from FiD_dialogue.src.options import Options
 from torchtext.data.metrics import bleu_score
-import src.slurm
-import src.util
-import src.evaluation
-import src.data
-import src.model
+import FiD_dialogue.src.slurm
+import FiD_dialogue.src.util
+import FiD_dialogue.src.evaluation
+import FiD_dialogue.src.data
+import FiD_dialogue.src.model
 
 
 def train(
@@ -80,7 +80,7 @@ def train(
                 scheduler.step()
                 model.zero_grad()
 
-            train_loss = src.util.average_main(train_loss, opt)
+            train_loss = FiD_dialogue.src.util.average_main(train_loss, opt)
             curr_loss += train_loss.item()
 
             if step % opt.eval_freq == 0:
@@ -91,7 +91,7 @@ def train(
                 if opt.is_main:
                     if dev_em > best_dev_em:
                         best_dev_em = dev_em
-                        src.util.save(
+                        FiD_dialogue.src.util.save(
                             model,
                             optimizer,
                             scheduler,
@@ -113,8 +113,8 @@ def train(
                     curr_loss = 0.
 
             if opt.is_main and step % opt.save_freq == 0:
-                src.util.save(model, optimizer, scheduler, step, best_dev_em,
-                              opt, checkpoint_path, f"step-{step}")
+                FiD_dialogue.src.util.save(model, optimizer, scheduler, step, best_dev_em,
+                                           opt, checkpoint_path, f"step-{step}")
             if step > opt.total_steps:
                 break
 
@@ -163,14 +163,14 @@ def evaluate(model, dataset, tokenizer, collator, opt):
                     print("gold:", gold[0])
                     print()
 
-                score = src.evaluation.ems(ans, gold)
+                score = FiD_dialogue.src.evaluation.ems(ans, gold)
                 bleu.append(bleu_score([ans.lower().split()], [
                             [gold[0].lower().split()]]))
 
                 total += 1
                 exactmatch.append(score)
 
-    exactmatch, total = src.util.weighted_average(
+    exactmatch, total = FiD_dialogue.src.util.weighted_average(
         np.mean(exactmatch), total, opt)
     bleu_mean = np.mean(bleu)
 
@@ -184,8 +184,8 @@ if __name__ == "__main__":
     opt = options.parse()
 
     torch.manual_seed(opt.seed)
-    src.slurm.init_distributed_mode(opt)
-    src.slurm.init_signal_handler()
+    FiD_dialogue.src.slurm.init_distributed_mode(opt)
+    FiD_dialogue.src.slurm.init_signal_handler()
 
     checkpoint_path = Path(opt.checkpoint_dir) / opt.name
     checkpoint_exists = checkpoint_path.exists()
@@ -193,42 +193,42 @@ if __name__ == "__main__":
         torch.distributed.barrier()
     checkpoint_path.mkdir(parents=True, exist_ok=True)
 
-    logger = src.util.init_logger(
+    logger = FiD_dialogue.src.util.init_logger(
         opt.is_main,
         opt.is_distributed,
         checkpoint_path / 'run.log'
     )
 
-    model_class = src.model.FiDT5
+    model_class = FiD_dialogue.src.model.FiDT5
 
     # load data
     tokenizer = transformers.T5Tokenizer.from_pretrained(
         opt.base_model_path, truncation_side="right")
-    collator = src.data.Collator(
+    collator = FiD_dialogue.src.data.Collator(
         opt.text_maxlength,
         tokenizer,
         answer_maxlength=opt.answer_maxlength,
         last_n=opt.last_n)
 
     # use golbal rank and world size to split the eval set on multiple gpus
-    train_examples = src.data.load_data(
+    train_examples = FiD_dialogue.src.data.load_data(
         opt.train_data,
         global_rank=opt.global_rank,
         world_size=opt.world_size,
     )
-    train_dataset = src.data.Dataset(train_examples, opt.n_context)
+    train_dataset = FiD_dialogue.src.data.Dataset(train_examples, opt.n_context)
     # use golbal rank and world size to split the eval set on multiple gpus
-    eval_examples = src.data.load_data(
+    eval_examples = FiD_dialogue.src.data.load_data(
         opt.eval_data,
         global_rank=opt.global_rank,
         world_size=opt.world_size,
     )
-    eval_dataset = src.data.Dataset(eval_examples, opt.n_context)
+    eval_dataset = FiD_dialogue.src.data.Dataset(eval_examples, opt.n_context)
 
     if not checkpoint_exists and opt.model_path == "none":
         t5 = transformers.T5ForConditionalGeneration.from_pretrained(
             opt.base_model_path)
-        model = src.model.FiDT5(t5.config)
+        model = FiD_dialogue.src.model.FiDT5(t5.config)
         model.load_t5(t5.state_dict())
         model = model.to(opt.local_rank)
         optimizer, scheduler = src.util.set_optim(opt, model)
@@ -236,11 +236,11 @@ if __name__ == "__main__":
     elif opt.model_path == "none":
         load_path = checkpoint_path / 'checkpoint' / 'latest'
         model, optimizer, scheduler, opt_checkpoint, step, best_dev_em = \
-            src.util.load(model_class, load_path, opt, reset_params=False)
+            FiD_dialogue.src.util.load(model_class, load_path, opt, reset_params=False)
         logger.info(f"Model loaded from {load_path}")
     else:
         model, optimizer, scheduler, opt_checkpoint, step, best_dev_em = \
-            src.util.load(model_class, opt.model_path, opt, reset_params=True)
+            FiD_dialogue.src.util.load(model_class, opt.model_path, opt, reset_params=True)
         logger.info(f"Model loaded from {opt.model_path}")
 
     model.set_checkpoint(opt.use_checkpoint)

@@ -7,7 +7,7 @@ subprocess.check_call([sys.executable, "-m", "pip", "install", "PyYAML"])
 
 setup(
     name="RuPersonaAgent",
-    version="1.0.0",
+    version="1.0.1",
     install_requires=[
         'aiohttp==3.8.5',
         'absl-py==1.3.0',

@@ -2,8 +2,7 @@ from threading import Lock
 from typing import Optional, Tuple
 
 import gradio as gr
-import relevant_doc
-from query_document import qa_chain
+from RAG_LLM_dialogue.query_document import qa_chain
 
 
 class ChatWrapper:

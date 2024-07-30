@@ -1,10 +1,10 @@
 import transformers
 import torch
-import src.slurm
-import src.util
-import src.data
-import src.evaluation
-import src.model
+import FiD_dialogue.src.slurm
+import FiD_dialogue.src.util
+import FiD_dialogue.src.data
+import FiD_dialogue.src.evaluation
+import FiD_dialogue.src.model
 
 
 class FiDAgent:
@@ -25,12 +25,12 @@ class FiDAgent:
         self.context = []
 
         self.text_maxlength = text_maxlength
-        model_class = src.model.FiDT5
+        model_class = FiD_dialogue.src.model.FiDT5
         model = model_class.from_pretrained(model_path)
         model = model.to(device)
         self.model = model
         self.tokenizer = transformers.T5Tokenizer.from_pretrained(
-            "/home/stc/disk/tirskikh/ruT5-base", truncation_side="right")
+            "ai-forever/ruT5-base", truncation_side="right")
 
     def set_persona(self, persona):
         self.persona = persona

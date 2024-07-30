@@ -1,7 +1,7 @@
 import torch
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from src.model import BiEncoder
+from RAG_LLM_dialogue.src.model import BiEncoder
 from transformers import AutoTokenizer
 
 checkpoint_path = 'bi_encoder/biencoder_checkpoint.ckpt'
