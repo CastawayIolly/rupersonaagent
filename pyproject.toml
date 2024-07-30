@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rupersonaagent"
-version = "0.1.0"
+version = "0.2.0"
 description = "library for creating a Russian-language dialog assistant"
 authors = ["Your Name <you@example.com>"]
 license = "MIT"
@@ -14,7 +14,15 @@ packages = [
     { include = "personification" },
     { include = "rule_based_information_extraction" },
     { include = "speech_extraction" },
+    { include = "augmentation"},
+    { include = "emotion_recognition"},
+    { include = "FiD_dialogue"},
+    { include = "model_interpretation"},
+    { include = "lora_lib"},
+    { include = "RAG_emotions"},
+    { include = "RAG_LLM_dialogue"}
 ]
+
 
 [tool.poetry.dependencies]
 python = "3.11.4"

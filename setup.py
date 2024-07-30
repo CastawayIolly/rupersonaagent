@@ -123,7 +123,7 @@ setup(
         'inference_optimization', 'internet_memory_model',
         'knowledge_distillation', 'personification',
         'rule_based_information_extraction',
-        'tests', 'datasets', 'augmentation',
+        'tests', 'custom_datasets', 'augmentation',
         'emotion_recognition', 'FiD_dialogue',
         'hate_speech', 'model_interpretation',
         'lora_lib', 'RAG_emotions', 'RAG_LLM_dialogue'
