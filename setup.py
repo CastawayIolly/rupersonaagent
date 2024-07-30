@@ -39,7 +39,7 @@ setup(
         'google-auth==2.14.1',
         'google-auth-oauthlib==0.4.6',
         'grpcio==1.50.0',
-        'huggingface-hub==0.21.0',
+        'huggingface-hub==0.23.2',
         'hydra-core==1.1.2',
         'idna==3.4',
         'importlib-resources==5.2',
