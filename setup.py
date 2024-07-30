@@ -109,7 +109,7 @@ setup(
         'torchmetrics==0.10.3',
         'tqdm==4.62.1',
         'transformers==4.43.3',
-        'typing-extensions==4.7.1',
+        'typing-extensions==4.8.0',
         'urllib3==1.26.19',
         'werkzeug==2.2.2',
         'xxhash==3.3.0',
