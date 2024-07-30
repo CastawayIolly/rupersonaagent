@@ -55,7 +55,7 @@ setup(
         'matplotlib==3.6.2',
         'multidict==6.0.2',
         'multiprocess==0.70.12.2',
-        'mypy-extensions==0.4.3',
+        'mypy-extensions==1.0.0',
         'numpy==1.21',
         'nest-asyncio==1.6.0',
         'nvidia-cublas-cu11==11.10.3.66',
