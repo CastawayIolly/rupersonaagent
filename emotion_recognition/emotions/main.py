@@ -1,7 +1,7 @@
 from lightning.pytorch.cli import LightningCLI
 from clearml import Task
-from lightning_module import MyModel
-from lightning_data_module import MyDataModule
+from emotion_recognition.emotions.lightning_module import MyModel
+from emotion_recognition.emotions.lightning_data_module import MyDataModule
 
 
 class MyLightningCLI(LightningCLI):

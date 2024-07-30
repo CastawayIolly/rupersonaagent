@@ -1,8 +1,7 @@
-import sys
-import subprocess
+import os
 from setuptools import setup, find_packages
 
-subprocess.check_call([sys.executable, "-m", "pip", "install", "PyYAML"])
+os.system('pip install lime==0.2.0.1, PyYAML')
 
 
 setup(
@@ -116,14 +115,18 @@ setup(
         'yarl==1.8.1',
         'nltk==3.7',
         'scipy==1.10.1',
-        'pyhamcrest==2.0.4'
+        'pyhamcrest==2.0.4',
+        'langdetect==1.0.9',
     ],
     packages=find_packages(include=[
         'generative_model', 'speech_extraction',
         'inference_optimization', 'internet_memory_model',
         'knowledge_distillation', 'personification',
         'rule_based_information_extraction',
-        'tests', 'datasets'
+        'tests', 'datasets', 'augmentation',
+        'emotion_recognition', 'FiD_dialogue',
+        'hate_speech', 'model_interpretation',
+        'lora_lib', 'RAG_emotions', 'RAG_LLM_dialogue'
     ])
 
 )
