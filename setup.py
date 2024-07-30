@@ -19,7 +19,7 @@ setup(
         'black==22.10.0',
         'beautifulsoup4==4.12.2',
         'cachetools==5.2.0',
-        'charset-normalizer==2.1.1',
+        'charset-normalizer==3.2.0',
         'clearml==1.8.1',
         'click==8.1.3',
         'commonmark==0.9.1',
