@@ -108,7 +108,7 @@ setup(
         'torch-tb-profiler==0.4.0',
         'torchmetrics==0.10.3',
         'tqdm==4.62.1',
-        'transformers==4.24.0',
+        'transformers==4.34.0',
         'typing-extensions==4.6.1',
         'urllib3==2.0',
         'werkzeug==2.2.2',
