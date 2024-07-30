@@ -10,7 +10,7 @@ setup(
     name="RuPersonaAgent",
     version="1.0.0",
     install_requires=[
-        'typer==0.12',
+        'typer==0.10',
         'aiohttp==3.8.5',
         'absl-py==1.3.0',
         'aiosignal==1.3.1',
