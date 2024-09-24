@@ -50,11 +50,11 @@ RuPersonaAgent can be installed with ``pip``:
 
 
 ## Diagrams of some methods
-![alt text](images/img.png)
+![alt text](images/qatask.png)
 
 Scheme of a question-answer task based on documents
 
-![alt text](images/img_1.png)
+![alt text](images/model.png)
 
 Scheme of operation of RAG + LLM
 
